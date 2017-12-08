@@ -3,7 +3,7 @@ package com.casualmiracles.transaction
 import cats.Monad
 
 
-final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], List[() ⇒ Unit], List[() ⇒ Unit])]) {
+final case class  Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], PostCommit, PostCommit)]) {
   private val monadF = implicitly[Monad[F]]
 
   def postSuccess(f: () ⇒ Unit): Transaction[F, E, A] =
@@ -17,14 +17,14 @@ final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], List[() �
 
   def flatMap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] = {
 
-    def runFunc(r: (Either[E, A], List[() ⇒ Unit], List[() ⇒ Unit])): F[(Either[E, B], List[() ⇒ Unit], List[() ⇒ Unit])] = {
-      def handRight(t: Transaction[F, E, B]): F[(Either[E, B], List[() ⇒ Unit], List[() ⇒ Unit])] = {
+    def runFunc(r: (Either[E, A], PostCommit, PostCommit)): F[(Either[E, B], PostCommit, PostCommit)] = {
+      def handRight(t: Transaction[F, E, B]): F[(Either[E, B], PostCommit, PostCommit)] = {
         monadF.map(t.run) { runRight ⇒
           (runRight._1, r._2 ::: runRight._2, r._3 ::: runRight._3)
         }
       }
 
-      def handleLeft(l: E): F[(Either[E, B], List[() ⇒ Unit], List[() ⇒ Unit])] = {
+      def handleLeft(l: E): F[(Either[E, B], PostCommit, PostCommit)] = {
         monadF.pure((Left(l), r._2, r._3))
       }
 
@@ -33,7 +33,7 @@ final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], List[() �
       newTrans.fold(handleLeft, handRight)
     }
 
-    val newRun: F[(Either[E, B], List[() ⇒ Unit], List[() ⇒ Unit])] =
+    val newRun: F[(Either[E, B], PostCommit, PostCommit)] =
       monadF.flatMap(run)(runFunc)
 
     Transaction(newRun)
