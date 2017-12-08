@@ -23,7 +23,9 @@ final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], PostCommi
       monadF.flatMap(run) {
         thisRun: Run[A] ⇒ {
           thisRun._1.fold(
-            // this is a left so we don't flatMap it
+            // this is a left so we don't flatMap it but it does need to be
+            // cast to the right type which works because its a Left, the Right
+            // doesn't actually exist
             _ ⇒ this.asInstanceOf[Transaction[F, E, B]].run,
 
             // this is a right so we can flatMap it
