@@ -21,11 +21,19 @@ final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], PostCommi
   def flatMap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
     Transaction {
       monadF.flatMap(run) {
-        r: Run[A] ⇒ {
-          r._1.map(f).fold(
-            (l: E) ⇒ monadF.pure((Left(l), r._2, r._3)),
-            (t: Transaction[F, E, B]) ⇒ monadF.map(t.run) { runRight: Run[B] ⇒
-              (runRight._1, r._2 ::: runRight._2, r._3 ::: runRight._3)
+        thisRun: Run[A] ⇒ {
+          thisRun._1.fold(
+            // this is a left so we don't flatMap it
+            _ ⇒ this.asInstanceOf[Transaction[F, E, B]].run,
+
+            // this is a right so we can flatMap it
+            (thisRightValue: A) ⇒ {
+              val newTransaction: Transaction[F, E, B] = f(thisRightValue)
+
+              // carry the existing post commit actions over to the result
+              monadF.map(newTransaction.run) { newRun: Run[B] ⇒
+                (newRun._1, thisRun._2 ::: newRun._2, thisRun._3 ::: newRun._3)
+              }
             }
           )
         }
