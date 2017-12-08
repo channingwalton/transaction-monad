@@ -52,4 +52,8 @@ scalacOptions ++= Seq(
   "-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
 )
 
-libraryDependencies += "org.typelevel" %% "cats-core" % "0.9.0"
+libraryDependencies ++= Seq(
+  "org.typelevel" %% "cats-core" % "0.9.0",
+  "org.typelevel" %% "cats-testkit" % "1.0.0-RC1"% Test,
+  "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.6" % Test
+)
