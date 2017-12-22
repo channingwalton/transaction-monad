@@ -40,7 +40,6 @@ final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], PostCommi
         }
       }
     }
-
 }
 
 object Transaction {
