@@ -33,7 +33,7 @@ final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], PostCommi
 
               // carry the existing post commit actions over to the result
               monadF.map(newTransaction.run) { newRun: Run[B] ⇒
-                (newRun._1, thisRun._2 ::: newRun._2, thisRun._3 ::: newRun._3)
+                (newRun._1, thisRun._2 ++ newRun._2, thisRun._3 ++ newRun._3)
               }
             }
           )

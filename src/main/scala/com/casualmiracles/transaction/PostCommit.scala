@@ -8,6 +8,6 @@ case class PostCommit(fs: List[() ⇒ Unit] = Nil) {
   def ::(f: () ⇒ Unit): PostCommit =
     PostCommit(f :: fs)
 
-  def :::(pc: PostCommit): PostCommit =
-    PostCommit(fs ::: pc.fs)
+  def ++(pc: PostCommit): PostCommit =
+    PostCommit(fs ++ pc.fs)
 }
