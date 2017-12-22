@@ -2,7 +2,6 @@ package com.casualmiracles.transaction
 
 import cats.Monad
 
-
 final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], PostCommit, PostCommit)]) {
 
   type Run[T] = (Either[E, T], PostCommit, PostCommit)
@@ -41,4 +40,10 @@ final case class Transaction[F[_] : Monad, E, A](run: F[(Either[E, A], PostCommi
         }
       }
     }
+
+}
+
+object Transaction {
+  def const[F[_], E, A](value: A)(implicit monad: Monad[F]): Transaction[F, E, A] =
+    Transaction(monad.pure((Right(value), PostCommit(), PostCommit())))
 }
