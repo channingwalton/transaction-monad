@@ -5,7 +5,7 @@ import cats.laws.discipline._
 import cats.tests._
 import org.scalacheck._
 
-class TransactionTest extends CatsSuite {
+class TransactionLawTest extends CatsSuite {
 
   type TestTransaction[A] = Transaction[Id, String, A]
   def testTransaction[A](a: A): TestTransaction[A] =
