@@ -1,9 +1,7 @@
-name := "Transaction Monad"
-
 inThisBuild(Seq(
   organization := "com.casualmiracles",
   scalaVersion := "2.12.4",
-  version := "0.1"
+  version := "0.0.1-SNAPSHOT"
 ))
 
 lazy val commonSettings = Seq(
@@ -58,15 +56,17 @@ lazy val commonSettings = Seq(
 
 lazy val coreDependencies = Seq(
   "org.typelevel" %% "cats-core" % "0.9.0",
-  "org.typelevel" %% "cats-testkit" % "1.0.0-RC1"% Test
+  "org.typelevel" %% "cats-testkit" % "1.0.0-RC1" % Test
 )
 
-lazy val root = project.in(file(".")).aggregate(core)
+publishArtifact in root := false
+
+lazy val root = project.in(file(".")).aggregate(core, fs2)
 
 lazy val coreSettings = commonSettings
 
 lazy val core = project.in(file("core"))
-                .settings(moduleName := "transaction")
+                .settings(moduleName := "transaction-core")
                 .settings(coreSettings:_*)
                 .settings(libraryDependencies := coreDependencies)
 
@@ -74,6 +74,10 @@ lazy val fs2Settings = commonSettings
 
 lazy val fs2 = project.in(file("fs2"))
     .dependsOn(core % "test->test;compile->compile")
-    .settings(moduleName := "fs2")
+    .settings(moduleName := "transaction-fs2")
     .settings(fs2Settings:_*)
-    .settings(libraryDependencies := coreDependencies ++ Seq("co.fs2" %% "fs2-core" % "0.9.7", "co.fs2" %% "fs2-cats" % "0.3.0"))
+    .settings(
+      libraryDependencies := coreDependencies ++
+        Seq(
+          "co.fs2" %% "fs2-core" % "0.9.7",
+          "co.fs2" %% "fs2-cats" % "0.3.0"))
