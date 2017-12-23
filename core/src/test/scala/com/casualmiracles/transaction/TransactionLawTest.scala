@@ -9,7 +9,7 @@ class TransactionLawTest extends CatsSuite {
 
   type TestTransaction[A] = Transaction[Id, String, A]
   def testTransaction[A](a: A): TestTransaction[A] =
-    Transaction[Id, String, A](Body(Right[String, A](a)))
+    Transaction[Id, String, A](Run(Right[String, A](a)))
 
   implicit val F: Monad[Id] = implicitly[Monad[Id]]
   implicit val catsMonad: Monad[TestTransaction] = new Monad[TestTransaction] {
@@ -21,9 +21,9 @@ class TransactionLawTest extends CatsSuite {
 
     override def tailRecM[A, B](a: A)(f: A ⇒ Transaction[Id, String, Either[A, B]]): Transaction[Id, String, B] =
       Transaction(F.tailRecM(a)(a0 => F.map(f(a0).run) {
-        case Body(Left(l), c, d)         => Right(Body(Left(l), c, d))
-        case Body(Right(Left(a1)), _, _) => Left(a1)
-        case Body(Right(Right(b)), c, d) => Right(Body(Right(b), c, d))
+        case Run(Left(l), c, d)         => Right(Run(Left(l), c, d))
+        case Run(Right(Left(a1)), _, _) => Left(a1)
+        case Run(Right(Right(b)), c, d) => Right(Run(Right(b), c, d))
       }))
   }
 

@@ -8,14 +8,14 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
   type TestTransaction[A] = Transaction[Id, String, A]
 
   def testTransaction[A](a: A): TestTransaction[A] =
-    Transaction[Id, String, A](Body(Right[String, A](a), PostCommit(), PostCommit()))
+    Transaction[Id, String, A](Run(Right[String, A](a), PostCommit(), PostCommit()))
 
   "post commits" - {
     "must be carried by map" in {
       val pc1 = () ⇒ ()
       val pc2 = () ⇒ ()
 
-      val t = Transaction[Id, String, Int](Body(Right[String, Int](1), PostCommit(List(pc1)), PostCommit(List(pc2))))
+      val t = Transaction[Id, String, Int](Run(Right[String, Int](1), PostCommit(List(pc1)), PostCommit(List(pc2))))
 
       val m = t.map(_ * 2)
 
