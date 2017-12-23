@@ -14,3 +14,8 @@ case class PostCommit(fs: List[() ⇒ Unit] = Nil) {
   def ++(pc: PostCommit): PostCommit =
     PostCommit(fs ++ pc.fs)
 }
+
+object PostCommit {
+  def apply(f: () ⇒ Unit): PostCommit =
+    new PostCommit(List(f))
+}

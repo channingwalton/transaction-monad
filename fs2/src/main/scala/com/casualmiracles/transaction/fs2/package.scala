@@ -6,7 +6,7 @@ import _root_.fs2.interop.cats._
 package object fs2 {
 
   def fromEither[E, A](value: Either[E, A]): Transaction[Task, E, A] =
-    Transaction(Task.delay((value, PostCommit(), PostCommit())))
+    Transaction(Task.delay(Body(value)))
 
   def const[E, A](value: A): Transaction[Task, E, A] =
     fromEither(Right[E, A](value))
@@ -30,17 +30,17 @@ package object fs2 {
   implicit class TransactionTaskOps[E, A](transaction: Transaction[Task, E, A]) {
 
     def unsafeAttemptRun(): Either[Either[Throwable, E], A] = {
-      val res: Either[Throwable, (Either[E, A], PostCommit, PostCommit)] = transaction.run.unsafeAttemptRun()
+      val res: Either[Throwable, Body[E, A]] = transaction.run.unsafeAttemptRun()
 
       res match {
         case Left(t) ⇒
           Left(Left(t))
 
-        case Right((Left(e), f, _)) ⇒
+        case Right(Body(Left(e), f, _)) ⇒
           f.run()
           Left(Right(e))
 
-        case Right((Right(a), _, s)) ⇒
+        case Right(Body(Right(a), _, s)) ⇒
           s.run()
           Right(a)
       }
