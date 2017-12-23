@@ -66,6 +66,14 @@ lazy val root = project.in(file(".")).aggregate(core)
 lazy val coreSettings = commonSettings
 
 lazy val core = project.in(file("core"))
-                .settings(moduleName := "core")
+                .settings(moduleName := "transaction")
                 .settings(coreSettings:_*)
                 .settings(libraryDependencies := coreDependencies)
+
+lazy val fs2Settings = commonSettings
+
+lazy val fs2 = project.in(file("fs2"))
+    .dependsOn(core % "test->test;compile->compile")
+    .settings(moduleName := "fs2")
+    .settings(fs2Settings:_*)
+    .settings(libraryDependencies := coreDependencies ++ Seq("co.fs2" %% "fs2-core" % "0.9.7"))
