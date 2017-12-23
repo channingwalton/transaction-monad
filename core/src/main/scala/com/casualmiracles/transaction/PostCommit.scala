@@ -5,6 +5,9 @@ package com.casualmiracles.transaction
   * @param fs the nasty functions
   */
 case class PostCommit(fs: List[() ⇒ Unit] = Nil) {
+  def run(): Unit =
+    fs.foreach(_())
+
   def ::(f: () ⇒ Unit): PostCommit =
     PostCommit(f :: fs)
 
