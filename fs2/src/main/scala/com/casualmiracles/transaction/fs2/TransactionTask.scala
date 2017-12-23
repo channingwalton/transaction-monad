@@ -1,9 +1,10 @@
-package com.casualmiracles.transaction
+package com.casualmiracles.transaction.fs2
 
 import _root_.fs2.Task
 import _root_.fs2.interop.cats._
+import com.casualmiracles.transaction.{Run, Transaction}
 
-package object fs2 {
+object TransactionTask {
 
   def fromEither[E, A](value: Either[E, A]): Transaction[Task, E, A] =
     Transaction(Task.delay(Run(value)))

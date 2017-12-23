@@ -91,7 +91,7 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
     * If T is an Option[B] then map None to an error and Some to the value.
     */
   def mapOption[B](err: E)(implicit ev: A =:= Option[B]): Transaction[F, E, B] =
-    flatMap(_.fold(Transaction.failure[F, E, B](err))(Transaction.const(_)))
+    flatMap(_.fold(Transaction.failure[F, E, B](err))(Transaction.pure(_)))
 }
 
 object Transaction {
@@ -99,7 +99,7 @@ object Transaction {
   def fromEither[F[_], E, A](value: Either[E, A])(implicit monad: Monad[F]): Transaction[F, E, A] =
     Transaction(monad.pure(Run(value)))
 
-  def const[F[_]: Monad, E, A](value: A): Transaction[F, E, A] =
+  def pure[F[_]: Monad, E, A](value: A): Transaction[F, E, A] =
     fromEither(Right(value))
 
   def failure[F[_]: Monad, E, A](err: E): Transaction[F, E, A] =
@@ -108,7 +108,7 @@ object Transaction {
   implicit def transactionMonad[F[_], E](implicit monadF: Monad[F]): Monad[Transaction[F, E, ?]] =
     new Monad[Transaction[F, E, ?]] {
       override def pure[A](x: A): Transaction[F, E, A] =
-        Transaction.const[F, E, A](x)
+        Transaction.pure[F, E, A](x)
 
       override def tailRecM[A, B](a: A)(f: A ⇒ Transaction[F, E, Either[A, B]]): Transaction[F, E, B] =
         Transaction(monadF.tailRecM(a)(a0 => monadF.map(f(a0).run) {
