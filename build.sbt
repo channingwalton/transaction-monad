@@ -55,8 +55,9 @@ lazy val commonSettings = Seq(
 )
 
 lazy val coreDependencies = Seq(
-  "org.typelevel" %% "cats-core" % "0.9.0",
-  "org.typelevel" %% "cats-testkit" % "1.0.0-RC1" % Test
+  "org.typelevel" %% "cats-core" % "1.0.0-RC2",
+  compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4"),
+  "org.typelevel" %% "cats-testkit" % "1.0.0-RC2" % Test
 )
 
 publishArtifact in root := false

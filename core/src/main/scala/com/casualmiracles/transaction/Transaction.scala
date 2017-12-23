@@ -104,4 +104,20 @@ object Transaction {
 
   def failure[F[_]: Monad, E, A](err: E): Transaction[F, E, A] =
     fromEither(Left[E, A](err))
+
+  implicit def transactionMonad[F[_], E](implicit monadF: Monad[F]): Monad[Transaction[F, E, ?]] =
+    new Monad[Transaction[F, E, ?]] {
+      override def pure[A](x: A): Transaction[F, E, A] =
+        Transaction.const[F, E, A](x)
+
+      override def tailRecM[A, B](a: A)(f: A ⇒ Transaction[F, E, Either[A, B]]): Transaction[F, E, B] =
+        Transaction(monadF.tailRecM(a)(a0 => monadF.map(f(a0).run) {
+          case Run(Left(l), c, d)         => Right(Run(Left(l), c, d))
+          case Run(Right(Left(a1)), _, _) => Left(a1)
+          case Run(Right(Right(b)), c, d) => Right(Run(Right(b), c, d))
+        }))
+
+      override def flatMap[A, B](fa: Transaction[F, E, A])(f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
+        fa.flatMap(f)
+    }
 }
