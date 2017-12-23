@@ -75,7 +75,6 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
   def flatTap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, A] =
     flatMap(a ⇒ f(a).map(_ ⇒ a))
 
-
   /**
     * Apply a function to the value and discard the result.
     */
@@ -87,9 +86,22 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
     */
   def void: Transaction[F, E, Unit] =
     map(_ ⇒ ())
+
+  /**
+    * If T is an Option[B] then map None to an error and Some to the value.
+    */
+  def mapOption[B](err: E)(implicit ev: A =:= Option[B]): Transaction[F, E, B] =
+    flatMap(_.fold(Transaction.failure[F, E, B](err))(Transaction.const(_)))
 }
 
 object Transaction {
-  def const[F[_], E, A](value: A)(implicit monad: Monad[F]): Transaction[F, E, A] =
-    Transaction(monad.pure(Run(Right(value), PostCommit(), PostCommit())))
+
+  def fromEither[F[_], E, A](value: Either[E, A])(implicit monad: Monad[F]): Transaction[F, E, A] =
+    Transaction(monad.pure(Run(value)))
+
+  def const[F[_]: Monad, E, A](value: A): Transaction[F, E, A] =
+    fromEither(Right(value))
+
+  def failure[F[_]: Monad, E, A](err: E): Transaction[F, E, A] =
+    fromEither(Left[E, A](err))
 }
