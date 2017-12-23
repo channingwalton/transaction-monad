@@ -15,7 +15,7 @@ package object fs2 {
     fromEither(Left[E, A](err))
 
   /**
-    * Run this transaction, executing side-effects on success or failure.
+    * Run a transaction, executing side-effects on success or failure.
     * Note that if the attempt to run the task completely fails with an Exception,
     * the failure tasks cannot be run since they aren't available.
     *
@@ -24,7 +24,7 @@ package object fs2 {
     * @tparam A success typ
     * @return Either a success or a failure. A failure can either be a Throwable or an E.
     */
-  def run[E, A](transaction: Transaction[Task, E, A]): Either[Either[Throwable, E], A] =
+  def unsafeAttemptRun[E, A](transaction: Transaction[Task, E, A]): Either[Either[Throwable, E], A] =
     transaction.unsafeAttemptRun()
 
   implicit class TransactionTaskOps[E, A](transaction: Transaction[Task, E, A]) {
