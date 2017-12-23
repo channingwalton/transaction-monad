@@ -18,14 +18,26 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
 
   private val monadF = implicitly[Monad[F]]
 
+  /**
+    * Append a function to run on success
+    */
   def postSuccess(f: () ⇒ Unit): Transaction[F, E, A] =
     Transaction(monadF.map(run)(_.appendSuccess(PostCommit(f))))
 
+  /**
+    * Append a function to run on failure
+    */
   def postFailure(f: () ⇒ Unit): Transaction[F, E, A] =
     Transaction(monadF.map(run)(_.appendFailure(PostCommit(f))))
 
   def map[B](f: A ⇒ B): Transaction[F, E, B] =
     Transaction(monadF.map(run)(_.map(f)))
+
+  /**
+    * Syntax for map.
+    */
+  def ∘[B](f: A ⇒ B): Transaction[F, E, B] =
+    map(f)
 
   def flatMap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
     Transaction {
@@ -33,7 +45,7 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
         thisRun: Run[E, A] ⇒ {
           thisRun.res.fold(
             // this is a left so we don't flatMap it but it does need to be
-            // cast to the right type which works because its a Left, the Right
+            // cast to the appropriate type which is safe because its a Left, the Right
             // doesn't actually exist
             _ ⇒ this.asInstanceOf[Transaction[F, E, B]].run,
 
@@ -50,6 +62,31 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
         }
       }
     }
+
+  /**
+    * Syntax for flatMap
+    */
+  def >>=[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
+    flatMap(f)
+
+  /**
+    * The Kestrel combinator - apply a monadic function and discard the result while keeping the effect.
+    */
+  def flatTap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, A] =
+    flatMap(a ⇒ f(a).map(_ ⇒ a))
+
+
+  /**
+    * Apply a function to the value and discard the result.
+    */
+  def tap[B](f: A ⇒ B): Transaction[F, E, A] =
+    map(a ⇒ { f(a);  a })
+
+  /**
+    * Map the value to Unit.
+    */
+  def void: Transaction[F, E, Unit] =
+    map(_ ⇒ ())
 }
 
 object Transaction {
