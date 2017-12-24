@@ -21,8 +21,8 @@ where _Run_ is
 
     final case class Run[E, A](res: Either[E, A], onFailure: PostRun = PostRun(), onSuccess: PostRun = PostRun()) {
 
-The core is supplemented by a second module, _transaction-cats-effect_, that provides _TransactionIO_
-to buid and run a _Transaction[cats.effect.IO, E, A]_.
+The core module is supplemented by a second module, _cats-effect_, that provides _TransactionIO_
+to build and run a _Transaction[cats.effect.IO, E, A]_.
 
-_TransactionIO.unsafeAttemptRun()_ that will run a transaction, the _PostRun_ operations as appropriate, and return
+_TransactionIO.unsafeAttemptRun()_ will run a transaction, run appropriate _PostRun_ operations, and return
 a result.
