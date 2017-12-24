@@ -26,3 +26,8 @@ to build and run a _Transaction[cats.effect.IO, E, A]_.
 
 _TransactionIO.unsafeAttemptRun()_ will run a transaction, run appropriate _PostRun_ operations, and return
 a result.
+
+
+# Using the Transaction Monad
+
+er, not published yet. If sensible people think this is a good idea then I will publish it.
