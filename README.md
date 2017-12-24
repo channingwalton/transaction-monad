@@ -9,7 +9,7 @@ In several projects we ended up with a monad transformer stack of the form:
     type IOWriter[A] = WriterT[IO, List[PostCommit], A]
     type Transaction[T] = EitherT[IOWriter, String, T]
 
-Where _IO_ is an effect like scalaz or cats-effect _IO_, _PostCommit_ is a function to run when the Transaction
+Where _IO_ is an effect like scalaz or cats-effect _IO_, and _PostCommit_ is a function to run when the Transaction
 is run successfully.
 
 However, this effect stack is a little cumbersome so this project wraps all this up in a single
