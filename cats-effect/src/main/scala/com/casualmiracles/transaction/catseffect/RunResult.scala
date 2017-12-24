@@ -1,6 +1,15 @@
 package com.casualmiracles.transaction.catseffect
 
-sealed trait RunResult[E, A] extends Product with Serializable
+import com.casualmiracles.transaction.catseffect.RunResult.{Error, Failure, Success}
+
+sealed trait RunResult[E, A] extends Product with Serializable {
+  def fold[T](success: A ⇒ T, failure: E ⇒ T, error: Throwable ⇒ T): T =
+    this match {
+      case Success(a) => success(a)
+      case Failure(e) => failure(e)
+      case Error(t) => error(t)
+    }
+}
 
 object RunResult {
 
