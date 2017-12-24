@@ -25,7 +25,7 @@ The core module is supplemented by a second module, _cats-effect_, that provides
 to build and run a _Transaction[cats.effect.IO, E, A]_.
 
 _TransactionIO.unsafeAttemptRun()_ will run a transaction, run appropriate _PostRun_ operations, and return
-a result.
+a _RunResult_.
 
 
 # Using the Transaction Monad
