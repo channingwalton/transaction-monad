@@ -22,7 +22,7 @@ object TransactionIO {
     * @param transaction to run
     * @tparam E error type
     * @tparam A success typ
-    * @return Either a success or a failure. A failure can either be a Throwable or an E.
+    * @return a RunResult.
     */
   def unsafeAttemptRun[E, A](transaction: Transaction[IO, E, A]): RunResult[E, A] = {
     transaction.run.attempt.unsafeRunSync() match {
