@@ -62,7 +62,7 @@ lazy val coreDependencies = Seq(
 
 publishArtifact in root := false
 
-lazy val root = project.in(file(".")).aggregate(core, fs2)
+lazy val root = project.in(file(".")).aggregate(core, catsEffect)
 
 lazy val coreSettings = commonSettings
 
@@ -71,14 +71,12 @@ lazy val core = project.in(file("core"))
                 .settings(coreSettings:_*)
                 .settings(libraryDependencies := coreDependencies)
 
-lazy val fs2Settings = commonSettings
+lazy val catsEffectSettings = commonSettings
 
-lazy val fs2 = project.in(file("fs2"))
+lazy val catsEffect = project.in(file("cats-effect"))
     .dependsOn(core % "test->test;compile->compile")
-    .settings(moduleName := "transaction-fs2")
-    .settings(fs2Settings:_*)
+    .settings(moduleName := "transaction-cats-effect")
+    .settings(catsEffectSettings:_*)
     .settings(
       libraryDependencies := coreDependencies ++
-        Seq(
-          "co.fs2" %% "fs2-core" % "0.9.7",
-          "co.fs2" %% "fs2-cats" % "0.3.0"))
+        Seq("org.typelevel" %% "cats-effect" % "0.5"))
