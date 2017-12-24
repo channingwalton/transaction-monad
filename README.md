@@ -13,7 +13,7 @@ Where _IO_ is an effect like scalaz or cats-effect _IO_, and _PostCommit_ is a f
 is run successfully.
 
 However, this effect stack is a little cumbersome so this project wraps all this up in a single
-[Transaction](core/src/main/scala/com.casualmiracles.transaction.Transaction.scala)
+[Transaction](core/src/main/scala/com/casualmiracles/transaction/Transaction.scala)
 
     final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]])
 
