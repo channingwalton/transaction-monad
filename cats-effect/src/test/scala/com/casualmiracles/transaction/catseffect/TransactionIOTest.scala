@@ -1,7 +1,7 @@
 package com.casualmiracles.transaction.catseffect
 
 import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
-import TransactionIO._
+import TransactionIOOps._
 
 class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
 

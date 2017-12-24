@@ -24,26 +24,18 @@ object TransactionIO {
     * @tparam A success typ
     * @return Either a success or a failure. A failure can either be a Throwable or an E.
     */
-  def unsafeAttemptRun[E, A](transaction: Transaction[IO, E, A]): Either[Either[Throwable, E], A] =
-    transaction.unsafeAttemptRun()
+  def unsafeAttemptRun[E, A](transaction: Transaction[IO, E, A]): Either[Either[Throwable, E], A] = {
+    transaction.run.attempt.unsafeRunSync() match {
+      case Left(t) ⇒
+        Left(Left(t))
 
-  implicit class TransactionIOOps[E, A](transaction: Transaction[IO, E, A]) {
+      case Right(Run(Left(e), f, _)) ⇒
+        f.run()
+        Left(Right(e))
 
-    def unsafeAttemptRun(): Either[Either[Throwable, E], A] = {
-      val res: Either[Throwable, Run[E, A]] = transaction.run.attempt.unsafeRunSync()
-
-      res match {
-        case Left(t) ⇒
-          Left(Left(t))
-
-        case Right(Run(Left(e), f, _)) ⇒
-          f.run()
-          Left(Right(e))
-
-        case Right(Run(Right(a), _, s)) ⇒
-          s.run()
-          Right(a)
-      }
+      case Right(Run(Right(a), _, s)) ⇒
+        s.run()
+        Right(a)
     }
   }
 }
