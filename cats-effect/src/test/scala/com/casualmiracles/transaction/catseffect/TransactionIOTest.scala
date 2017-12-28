@@ -6,7 +6,7 @@ import TransactionIOOps._
 class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
 
   "Success" in {
-    TransactionIO.const[String, String]("hi").unsafeAttemptRun() mustBe RunResult.Success("hi")
+    TransactionIO.success[String, String]("hi").unsafeAttemptRun() mustBe RunResult.Success("hi")
   }
 
   "Failure" - {
@@ -16,7 +16,7 @@ class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
 
     "when a non-fatal exception is thrown" in {
       val exception = new RuntimeException()
-      TransactionIO.const[String, String]("ok").map(_ ⇒ throw exception).unsafeAttemptRun() mustBe RunResult.Error(exception)
+      TransactionIO.success[String, String]("ok").map(_ ⇒ throw exception).unsafeAttemptRun() mustBe RunResult.Error(exception)
     }
   }
 }

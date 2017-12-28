@@ -8,7 +8,7 @@ object TransactionIO {
   def fromEither[E, A](value: Either[E, A]): Transaction[IO, E, A] =
     Transaction(IO(Run(value)))
 
-  def const[E, A](value: A): Transaction[IO, E, A] =
+  def success[E, A](value: A): Transaction[IO, E, A] =
     fromEither(Right[E, A](value))
 
   def failure[E, A](err: E): Transaction[IO, E, A] =
