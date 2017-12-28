@@ -2,15 +2,15 @@ package com.casualmiracles.transaction
 
 import cats.Monad
 
-final case class Run[E, A](res: Either[E, A], onFailure: PostRun = PostRun(), onSuccess: PostRun = PostRun()) {
+final case class Run[E, A](res: Either[E, A], onFailure: OnFailure = OnFailure(), onSuccess: OnSuccess = OnSuccess()) {
 
   def map[B](f: A ⇒ B): Run[E, B] =
     copy(res = res.map(f))
 
-  def appendFailure(pc: PostRun): Run[E, A] =
+  def appendFailure(pc: OnFailure): Run[E, A] =
     copy(onFailure = onFailure ++ pc)
 
-  def appendSuccess(pc: PostRun): Run[E, A] =
+  def appendSuccess(pc: OnSuccess): Run[E, A] =
     copy(onSuccess = onSuccess ++ pc)
 }
 
@@ -22,13 +22,13 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
     * Append a function to run on success
     */
   def onSuccess(f: () ⇒ Unit): Transaction[F, E, A] =
-    Transaction(monadF.map(run)(_.appendSuccess(PostRun(f))))
+    Transaction(monadF.map(run)(_.appendSuccess(OnSuccess(f))))
 
   /**
     * Append a function to run on failure
     */
   def onFailure(f: () ⇒ Unit): Transaction[F, E, A] =
-    Transaction(monadF.map(run)(_.appendFailure(PostRun(f))))
+    Transaction(monadF.map(run)(_.appendFailure(OnFailure(f))))
 
   def map[B](f: A ⇒ B): Transaction[F, E, B] =
     Transaction(monadF.map(run)(_.map(f)))

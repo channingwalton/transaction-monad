@@ -2,20 +2,38 @@ package com.casualmiracles.transaction
 
 /**
   * A list of nasty side-effects to run after a transaction has completed.
-  * @param fs the nasty functions
   */
-case class PostRun(fs: List[() ⇒ Unit] = Nil) {
+sealed trait PostRun {
+  def fs: List[() ⇒ Unit]
+
   def run(): Unit =
     fs.foreach(_())
+}
+
+case class OnSuccess(fs: List[() ⇒ Unit] = Nil) extends PostRun {
 
   /**
     * Append PostRun's functions to this
     */
-  def ++(pc: PostRun): PostRun =
-    PostRun(fs ++ pc.fs)
+  def ++(pc: OnSuccess): OnSuccess =
+    OnSuccess(fs ++ pc.fs)
 }
 
-object PostRun {
-  def apply(f: () ⇒ Unit): PostRun =
-    new PostRun(List(f))
+case class OnFailure(fs: List[() ⇒ Unit] = Nil) extends PostRun {
+
+  /**
+    * Append PostRun's functions to this
+    */
+  def ++(pc: OnFailure): OnFailure =
+    OnFailure(fs ++ pc.fs)
+}
+
+object OnSuccess {
+  def apply(f: () ⇒ Unit): OnSuccess =
+    OnSuccess(List(f))
+}
+
+object OnFailure {
+  def apply(f: () ⇒ Unit): OnFailure =
+    OnFailure(List(f))
 }
