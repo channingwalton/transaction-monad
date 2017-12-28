@@ -14,18 +14,12 @@ sealed trait PostRun[T <: PostRun[T]] {
 
 case class OnSuccess(fs: List[() ⇒ Unit] = Nil) extends PostRun[OnSuccess] {
 
-  /**
-    * Append PostRun's functions to this
-    */
   def ++(pc: OnSuccess): OnSuccess =
     OnSuccess(fs ++ pc.fs)
 }
 
 case class OnFailure(fs: List[() ⇒ Unit] = Nil) extends PostRun[OnFailure] {
 
-  /**
-    * Append PostRun's functions to this
-    */
   def ++(pc: OnFailure): OnFailure =
     OnFailure(fs ++ pc.fs)
 }
