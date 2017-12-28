@@ -17,9 +17,7 @@ However, this effect stack is a little cumbersome so this project wraps all this
 
     final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]])
 
-where _Run_ is
-
-    final case class Run[E, A](res: Either[E, A], onFailure: PostRun = PostRun(), onSuccess: PostRun = PostRun()) {
+where _Run_ wraps an Either value, and functions that will be run after the transaction is run.
 
 The core module is supplemented by a second module, _cats-effect_, that provides _TransactionIO_
 to build and run a _Transaction[cats.effect.IO, E, A]_.
