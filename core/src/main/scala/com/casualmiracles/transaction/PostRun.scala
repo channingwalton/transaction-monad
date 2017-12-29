@@ -6,7 +6,7 @@ package com.casualmiracles.transaction
 sealed trait PostRun[T <: PostRun[T]] {
   def fs: List[() ⇒ Unit]
 
-  def run(): Unit =
+  def unsafeRun(): Unit =
     fs.foreach(_())
 
   def ++(pc: T): T

@@ -29,11 +29,11 @@ object TransactionIO {
       case Left(t) ⇒ RunResult.Error(t)
 
       case Right(Run(Left(e), f, _)) ⇒
-        f.run()
+        f.unsafeRun()
         RunResult.Failure(e)
 
       case Right(Run(Right(a), _, s)) ⇒
-        s.run()
+        s.unsafeRun()
         RunResult.Success(a)
     }
   }
