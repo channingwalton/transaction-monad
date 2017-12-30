@@ -19,12 +19,10 @@ However, this effect stack is a little cumbersome so this project wraps all this
 
 where _Run_ wraps an Either value, and functions that will be run after the transaction is run.
 
+_Transaction.unsafeRun_ will execute the transaction given an implicit _TransactionRunner_.
+
 The core module is supplemented by a second module, _cats-effect_, that provides _TransactionIO_
-to build and run a _Transaction[cats.effect.IO, E, A]_.
-
-_TransactionIO.unsafeAttemptRun()_ will run a transaction, run appropriate _PostRun_ operations, and return
-a _RunResult_.
-
+to build and run a _Transaction[cats.effect.IO, E, A]_, and a _TransactionRunner[IO]_.
 
 # Using the Transaction Monad
 
