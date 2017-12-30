@@ -8,20 +8,23 @@ import com.casualmiracles.transaction.Transaction
 class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
 
   "Success" in {
-    val trans = TransactionIO.success[String, String]("hi")
-    assertTransaction(trans, RunResult.Success[String, String]("hi"), true, false)
+    assertTransaction(
+      TransactionIO.success[String, String]("hi"),
+      RunResult.Success[String, String]("hi"), true, false)
   }
 
   "Failure" - {
     "when the result is a failure" in {
-      val trans = TransactionIO.failure[String, String]("oops")
-      assertTransaction(trans, RunResult.Failure[String, String]("oops"), false, true)
+      assertTransaction(
+        TransactionIO.failure[String, String]("oops"),
+        RunResult.Failure[String, String]("oops"), false, true)
     }
 
     "when a non-fatal exception is thrown" in {
       val exception = new RuntimeException()
-      val trans: Transaction[IO, String, String] = TransactionIO.success[String, String]("ok").map(_ ⇒ throw exception)
-      assertTransaction(trans, RunResult.Error(exception), false, false)
+      assertTransaction(
+        TransactionIO.success[String, String]("ok").map(_ ⇒ throw exception),
+        RunResult.Error(exception), false, false)
     }
   }
 
