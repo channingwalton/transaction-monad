@@ -92,6 +92,25 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
     */
   def mapOption[B](err: E)(implicit ev: A =:= Option[B]): Transaction[F, E, B] =
     flatMap(_.fold(Transaction.failure[F, E, B](err))(Transaction.pure(_)))
+
+  /**
+    * Run this transaction, executing side-effects on success or failure.
+    * Note that if the attempt to run fails with an Exception,
+    * no side-effects will be run.
+    */
+  def unsafeAttemptRun(implicit runner: TransactionRunner[F]): RunResult[E, A] = {
+    runner.unsafeRun(this) match {
+      case Left(t) ⇒ RunResult.Error(t)
+
+      case Right(Run(Left(e), f, _)) ⇒
+        f.unsafeRun()
+        RunResult.Failure(e)
+
+      case Right(Run(Right(a), _, s)) ⇒
+        s.unsafeRun()
+        RunResult.Success(a)
+    }
+  }
 }
 
 object Transaction {

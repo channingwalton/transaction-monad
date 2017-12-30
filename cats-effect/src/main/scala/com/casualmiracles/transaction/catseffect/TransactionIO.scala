@@ -14,27 +14,4 @@ object TransactionIO {
   def failure[E, A](err: E): Transaction[IO, E, A] =
     fromEither(Left[E, A](err))
 
-  /**
-    * Run a transaction, executing side-effects on success or failure.
-    * Note that if the attempt to run the IO completely fails with an Exception,
-    * the failure IOs cannot be run since they aren't available.
-    *
-    * @param transaction to run
-    * @tparam E error type
-    * @tparam A success typ
-    * @return a RunResult.
-    */
-  def unsafeAttemptRun[E, A](transaction: Transaction[IO, E, A]): RunResult[E, A] = {
-    transaction.run.attempt.unsafeRunSync() match {
-      case Left(t) ⇒ RunResult.Error(t)
-
-      case Right(Run(Left(e), f, _)) ⇒
-        f.unsafeRun()
-        RunResult.Failure(e)
-
-      case Right(Run(Right(a), _, s)) ⇒
-        s.unsafeRun()
-        RunResult.Success(a)
-    }
-  }
 }

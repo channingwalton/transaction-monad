@@ -1,9 +1,8 @@
 package com.casualmiracles.transaction.catseffect
 
 import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
-import TransactionIOOps._
 import cats.effect.IO
-import com.casualmiracles.transaction.Transaction
+import com.casualmiracles.transaction.{RunResult, Transaction}
 
 class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
 
@@ -34,7 +33,7 @@ class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
 
     val transWithFunctions = trans.onSuccess(() ⇒ onSuccess = true).onFailure(() ⇒ onFailure = true)
 
-    transWithFunctions.unsafeAttemptRun() mustBe result
+    transWithFunctions.unsafeAttemptRun mustBe result
 
     onSuccess mustBe onSuccessRun
     onFailure mustBe onFailureRun
