@@ -1,9 +1,7 @@
-inThisBuild(Seq(
-  organization := "com.casualmiracles",
-  name := "transaction-monad",
-  scalaVersion := "2.12.4",
-  scalaBinaryVersion := "2.12",
-))
+organization := "com.casualmiracles"
+name := "transaction-monad"
+scalaVersion := "2.12.4"
+scalaBinaryVersion := "2.12"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
@@ -66,7 +64,7 @@ def publishSettings: Seq[Setting[_]] = Seq(
   publishMavenStyle := true,
   publishArtifact in Test := false,
   pomIncludeRepository := { _ ⇒ false },
-  publishTo in ThisBuild := {
+  publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
       Some("snapshots" at nexus + "content/repositories/snapshots")
@@ -94,6 +92,7 @@ def publishSettings: Seq[Setting[_]] = Seq(
 lazy val root =
   project.in(file("."))
       .aggregate(core, catsEffect)
+        .settings(publishArtifact := false)
 
 lazy val coreSettings = commonSettings
 
