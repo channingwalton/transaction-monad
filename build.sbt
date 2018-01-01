@@ -61,13 +61,12 @@ lazy val coreDependencies = Seq(
   "org.typelevel" %% "cats-testkit" % "1.0.0" % Test
 )
 
-publishArtifact in root := false
-
 lazy val root = project.in(file(".")).aggregate(core, catsEffect)
 
 lazy val coreSettings = commonSettings
 
 lazy val core = project.in(file("core"))
+                .settings(publishSettings)
                 .settings(moduleName := "transaction-core")
                 .settings(coreSettings:_*)
                 .settings(libraryDependencies := coreDependencies)
