@@ -66,8 +66,8 @@ def publishSettings: Seq[Setting[_]] = Seq(
   publishMavenStyle := true,
   publishArtifact in Test := false,
   pomIncludeRepository := { _ ⇒ false },
-  homepage := Some(url("https://github.com/channingwalton/transaction-monad")),
   pomIncludeRepository := Function.const(false),
+  homepage := Some(url("http://underscore.io")),
   publishTo in ThisBuild := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
@@ -75,23 +75,27 @@ def publishSettings: Seq[Setting[_]] = Seq(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
-
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/channingwalton/transaction-monad"),
+      "scm:git@github.com/channingwalton/transaction-monad.git"
+    )
+  ),
+  developers := List(
+    Developer(
+      id    = "channingwalton",
+      name  = "Channing Walton",
+      email = "channing.walton@undercsore.io",
+      url   = url("http://underscore.io/")
+    )
+  ),
   pomExtra := <licenses>
     <license>
       <name>MIT License</name>
       <url>http://www.opensource.org/licenses/mit-license/</url>
       <distribution>repo</distribution>
     </license>
-  </licenses>
-    <url>https://github.com/channingwalton/transaction-monad</url>
-    <developers>
-      <developer>
-        <id>cjw</id>
-        <name>Channing Walton</name>
-        <email>channing [dot] walton [at] casualmiracles [dot] com</email>
-        <organization>Casual Miracles Ltd</organization>
-      </developer>
-    </developers>)
+  </licenses>)
 
 lazy val noPublishSettings = Seq(
   skip in publish := true
