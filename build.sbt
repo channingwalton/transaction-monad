@@ -66,6 +66,8 @@ def publishSettings: Seq[Setting[_]] = Seq(
   publishMavenStyle := true,
   publishArtifact in Test := false,
   pomIncludeRepository := { _ ⇒ false },
+  homepage := Some(url("https://github.com/channingwalton/transaction-monad")),
+  pomIncludeRepository := Function.const(false),
   publishTo in ThisBuild := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
