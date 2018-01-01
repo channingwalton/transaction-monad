@@ -23,7 +23,7 @@ it simpler to understand and use.
 
     final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]])
 
-where [Run](core/src/main/scala/com/casualmiracles/transaction/Transaction.scala) wraps an Either value, and functions
+where [Run](core/src/main/scala/com/casualmiracles/transaction/Run.scala) wraps an Either value, and functions
 that will be run after the transaction is run.
 
 _Transaction.unsafeRun_ will execute the transaction given an implicit
