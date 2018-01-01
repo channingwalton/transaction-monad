@@ -1,5 +1,8 @@
 # The Transaction Monad
 
+[![Build Status](https://travis-ci.org/channingwalton/transaction-monad.svg?branch=master)](https://travis-ci.org/channingwalton/transaction-monad)
+
+
 The Transaction Monad represents a transactional operation that may or may not be successful (much like Either),
 with functions to run depending on the success or failure of the transaction.
 
