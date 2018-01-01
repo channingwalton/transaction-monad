@@ -76,8 +76,39 @@ lazy val catsEffectSettings = commonSettings
 
 lazy val catsEffect = project.in(file("cats-effect"))
     .dependsOn(core % "test->test;compile->compile")
+    .settings(publishSettings)
     .settings(moduleName := "transaction-cats-effect")
     .settings(catsEffectSettings:_*)
     .settings(
       libraryDependencies := coreDependencies ++
         Seq("org.typelevel" %% "cats-effect" % "0.5"))
+
+def publishSettings: Seq[Setting[_]] = Seq(
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  pomIncludeRepository := { _ ⇒ false },
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+  },
+
+  pomExtra := <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license/</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+    <url>https://github.com/channingwalton/transaction-monad</url>
+    <developers>
+      <developer>
+        <id>cjw</id>
+        <name>Channing Walton</name>
+        <email>channing [dot] walton [at] casualmiracles [dot] com</email>
+        <organization>Casual Miracles Ltd</organization>
+      </developer>
+    </developers>)
