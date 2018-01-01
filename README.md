@@ -1,7 +1,7 @@
 # The Transaction Monad
 
 The Transaction Monad represents a transactional operation that may or may not be successful (much like Either),
-with post run operations to run depending on success or failure.
+with functions to run depending on the success or failure of the transaction.
 
 In several projects we ended up with a monad transformer stack of the form:
 
