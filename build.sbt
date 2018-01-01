@@ -93,6 +93,7 @@ lazy val root =
   project.in(file("."))
       .aggregate(core, catsEffect)
         .settings(publishArtifact := false)
+        .settings(skip in publish := true)
 
 lazy val coreSettings = commonSettings
 
