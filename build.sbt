@@ -66,7 +66,7 @@ def publishSettings: Seq[Setting[_]] = Seq(
   publishMavenStyle := true,
   publishArtifact in Test := false,
   pomIncludeRepository := { _ ⇒ false },
-  publishTo := {
+  publishTo in ThisBuild := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
       Some("snapshots" at nexus + "content/repositories/snapshots")
@@ -93,8 +93,6 @@ def publishSettings: Seq[Setting[_]] = Seq(
 
 lazy val root =
   project.in(file("."))
-    .settings(publishArtifact := false)
-    .settings(skip in publish := true)
       .aggregate(core, catsEffect)
 
 lazy val coreSettings = commonSettings
