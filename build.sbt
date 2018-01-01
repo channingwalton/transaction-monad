@@ -61,27 +61,6 @@ lazy val coreDependencies = Seq(
   "org.typelevel" %% "cats-testkit" % "1.0.0" % Test
 )
 
-lazy val root = project.in(file(".")).aggregate(core, catsEffect)
-
-lazy val coreSettings = commonSettings
-
-lazy val core = project.in(file("core"))
-                .settings(publishSettings)
-                .settings(moduleName := "transaction-core")
-                .settings(coreSettings:_*)
-                .settings(libraryDependencies := coreDependencies)
-
-lazy val catsEffectSettings = commonSettings
-
-lazy val catsEffect = project.in(file("cats-effect"))
-    .dependsOn(core % "test->test;compile->compile")
-    .settings(publishSettings)
-    .settings(moduleName := "transaction-cats-effect")
-    .settings(catsEffectSettings:_*)
-    .settings(
-      libraryDependencies := coreDependencies ++
-        Seq("org.typelevel" %% "cats-effect" % "0.5"))
-
 def publishSettings: Seq[Setting[_]] = Seq(
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   publishMavenStyle := true,
@@ -111,3 +90,26 @@ def publishSettings: Seq[Setting[_]] = Seq(
         <organization>Casual Miracles Ltd</organization>
       </developer>
     </developers>)
+
+lazy val root =
+  project.in(file("."))
+      .aggregate(core, catsEffect)
+    .settings(publishSettings)
+
+lazy val coreSettings = commonSettings
+
+lazy val core = project.in(file("core"))
+                .settings(publishSettings)
+                .settings(moduleName := "transaction-core")
+                .settings(coreSettings:_*)
+                .settings(libraryDependencies := coreDependencies)
+
+lazy val catsEffectSettings = commonSettings
+
+lazy val catsEffect = project.in(file("cats-effect"))
+    .dependsOn(core % "test->test;compile->compile")
+    .settings(moduleName := "transaction-cats-effect")
+    .settings(catsEffectSettings:_*)
+    .settings(
+      libraryDependencies := coreDependencies ++
+        Seq("org.typelevel" %% "cats-effect" % "0.5"))
