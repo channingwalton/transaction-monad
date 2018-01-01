@@ -19,10 +19,10 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
 
       val m = t.map(_ * 2)
 
-      m.run.onFailure.fs.size mustBe 1
-      m.run.onFailure.fs.head mustBe pc1
-      m.run.onSuccess.fs.size mustBe 1
-      m.run.onSuccess.fs.head mustBe pc2
+      m.runF.onFailure.fs.size mustBe 1
+      m.runF.onFailure.fs.head mustBe pc1
+      m.runF.onSuccess.fs.size mustBe 1
+      m.runF.onSuccess.fs.head mustBe pc2
     }
 
     "must be concatenated by flatMap" in {
@@ -36,10 +36,10 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
 
       val res = t1.flatMap(_ ⇒ t2)
 
-      res.run.onFailure.fs.size mustBe 2
-      res.run.onFailure.fs mustBe List(pc2, pc4)
-      res.run.onSuccess.fs.size mustBe 2
-      res.run.onSuccess.fs mustBe List(pc1, pc3)
+      res.runF.onFailure.fs.size mustBe 2
+      res.runF.onFailure.fs mustBe List(pc2, pc4)
+      res.runF.onSuccess.fs.size mustBe 2
+      res.runF.onSuccess.fs mustBe List(pc1, pc3)
     }
   }
 }

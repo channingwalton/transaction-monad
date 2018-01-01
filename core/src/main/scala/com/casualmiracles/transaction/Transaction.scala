@@ -2,7 +2,7 @@ package com.casualmiracles.transaction
 
 import cats.Monad
 
-final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
+final case class Transaction[F[_] : Monad, E, A](runF: F[Run[E, A]]) {
 
   private val monadF = implicitly[Monad[F]]
 
@@ -10,16 +10,16 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
     * Append a function to run on success
     */
   def onSuccess(f: () ⇒ Unit): Transaction[F, E, A] =
-    Transaction(monadF.map(run)(_.appendSuccess(OnSuccess(f))))
+    Transaction(monadF.map(runF)(_.appendSuccess(OnSuccess(f))))
 
   /**
     * Append a function to run on failure
     */
   def onFailure(f: () ⇒ Unit): Transaction[F, E, A] =
-    Transaction(monadF.map(run)(_.appendFailure(OnFailure(f))))
+    Transaction(monadF.map(runF)(_.appendFailure(OnFailure(f))))
 
   def map[B](f: A ⇒ B): Transaction[F, E, B] =
-    Transaction(monadF.map(run)(_.map(f)))
+    Transaction(monadF.map(runF)(_.map(f)))
 
   /**
     * Syntax for map.
@@ -29,20 +29,20 @@ final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]]) {
 
   def flatMap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
     Transaction {
-      monadF.flatMap(run) {
+      monadF.flatMap(runF) {
         thisRun: Run[E, A] ⇒ {
           thisRun.res.fold(
             // this is a left so we don't flatMap it but it does need to be
             // cast to the appropriate type which is safe because its a Left, the Right
             // doesn't actually exist
-            _ ⇒ this.asInstanceOf[Transaction[F, E, B]].run,
+            _ ⇒ this.asInstanceOf[Transaction[F, E, B]].runF,
 
             // this is a right so we can flatMap it
             (thisRightValue: A) ⇒ {
               val newTransaction: Transaction[F, E, B] = f(thisRightValue)
 
               // carry the existing post commit actions over to the result
-              monadF.map(newTransaction.run) { newRun: Run[E, B] ⇒
+              monadF.map(newTransaction.runF) { newRun: Run[E, B] ⇒
                 Run(newRun.res, thisRun.onFailure ++ newRun.onFailure, thisRun.onSuccess ++ newRun.onSuccess)
               }
             }
@@ -118,7 +118,7 @@ object Transaction {
         Transaction.pure[F, E, A](x)
 
       override def tailRecM[A, B](a: A)(f: A ⇒ Transaction[F, E, Either[A, B]]): Transaction[F, E, B] =
-        Transaction(monadF.tailRecM(a)(a0 => monadF.map(f(a0).run) {
+        Transaction(monadF.tailRecM(a)(a0 => monadF.map(f(a0).runF) {
           case Run(Left(l), c, d)         => Right(Run(Left(l), c, d))
           case Run(Right(Left(a1)), _, _) => Left(a1)
           case Run(Right(Right(b)), c, d) => Right(Run(Right(b), c, d))

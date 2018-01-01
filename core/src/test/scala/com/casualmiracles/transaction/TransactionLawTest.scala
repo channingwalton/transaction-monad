@@ -16,7 +16,7 @@ class TransactionLawTest extends CatsSuite {
 
   implicit def dataEqForTransaction[A]: Eq[TestTransaction[A]] =
     (x: TestTransaction[A], y: TestTransaction[A]) =>
-      x.run.res == y.run.res
+      x.runF.res == y.runF.res
 
   implicit def arbitraryTransaction[A: Arbitrary]: Arbitrary[TestTransaction[A]] =
     Arbitrary(
