@@ -93,9 +93,9 @@ def publishSettings: Seq[Setting[_]] = Seq(
 
 lazy val root =
   project.in(file("."))
+    .settings(publishArtifact := false)
+    .settings(skip in publish := true)
       .aggregate(core, catsEffect)
-        .settings(publishArtifact := false)
-        .settings(skip in publish := true)
 
 lazy val coreSettings = commonSettings
 
