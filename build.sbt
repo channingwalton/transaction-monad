@@ -91,8 +91,13 @@ def publishSettings: Seq[Setting[_]] = Seq(
       </developer>
     </developers>)
 
+lazy val noPublishSettings = Seq(
+  skip in publish := true
+)
+
 lazy val root =
   project.in(file("."))
+    .settings(noPublishSettings)
       .aggregate(core, catsEffect)
 
 lazy val coreSettings = commonSettings
@@ -106,9 +111,10 @@ lazy val core = project.in(file("core"))
 lazy val catsEffectSettings = commonSettings
 
 lazy val catsEffect = project.in(file("cats-effect"))
-    .dependsOn(core % "test->test;compile->compile")
-    .settings(moduleName := "transaction-cats-effect")
-    .settings(catsEffectSettings:_*)
-    .settings(
+  .settings(publishSettings)
+  .dependsOn(core % "test->test;compile->compile")
+  .settings(moduleName := "transaction-cats-effect")
+  .settings(catsEffectSettings:_*)
+  .settings(
       libraryDependencies := coreDependencies ++
         Seq("org.typelevel" %% "cats-effect" % "0.5"))
