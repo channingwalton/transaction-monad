@@ -1,7 +1,8 @@
 inThisBuild(Seq(
   organization := "com.casualmiracles",
+  name := "transaction-monad",
   scalaVersion := "2.12.4",
-  version := "0.0.1-SNAPSHOT"
+  scalaBinaryVersion := "2.12",
 ))
 
 lazy val commonSettings = Seq(
