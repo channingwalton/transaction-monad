@@ -34,4 +34,14 @@ to build and run a _Transaction[cats.effect.IO, E, A]_, and a [TransactionRunner
 
 # Using the Transaction Monad
 
-er, not published yet. If sensible people think this is a good idea then I will publish it.
+```scala
+libraryDependencies ++= Seq(
+  "com.casualmiracles" %% "transaction-core" % "0.0.7",
+  "org.typelevel" %% "cats-core" % "1.0.0")
+```
+
+```scala
+libraryDependencies ++= Seq(
+  "com.casualmiracles" %% "transaction-cats-effect" % "0.0.7",
+  "org.typelevel" %% "cats-effect" % "0.5")
+```
