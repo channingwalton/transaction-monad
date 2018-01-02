@@ -39,12 +39,12 @@ to build and run a _Transaction[cats.effect.IO, E, A]_, and a [TransactionRunner
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.casualmiracles" %% "transaction-core" % "0.0.8",
+  "com.casualmiracles" %% "transaction-core" % "0.0.9",
   "org.typelevel" %% "cats-core" % "1.0.0")
 ```
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.casualmiracles" %% "transaction-cats-effect" % "0.0.8",
+  "com.casualmiracles" %% "transaction-cats-effect" % "0.0.9",
   "org.typelevel" %% "cats-effect" % "0.5")
 ```
