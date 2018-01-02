@@ -31,8 +31,8 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
       val pc3 = () ⇒ ()
       val pc4 = () ⇒ ()
 
-      val t1 = Transaction.pure[Id, String, Int](1).onSuccess(pc1).onFailure(pc2)
-      val t2 = Transaction.pure[Id, String, Int](1).onSuccess(pc3).onFailure(pc4)
+      val t1 = Transaction.success[Id, String, Int](1).onSuccess(pc1).onFailure(pc2)
+      val t2 = Transaction.success[Id, String, Int](1).onSuccess(pc3).onFailure(pc4)
 
       val res = t1.flatMap(_ ⇒ t2)
 
