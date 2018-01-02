@@ -5,11 +5,21 @@ import doobie._
 import doobie.implicits._
 import cats.effect._
 import cats.implicits._
+import doobie.h2.H2Transactor
 
-object DoobieExample {
+object DoobieExample extends App {
 
   // The T R A N S A C T O R !
-  val xa = Transactor.fromDriverManager[IO]("Driver", "jdbc:hmm:world", "blah", "blah")
+  val xa: H2Transactor[IO] = H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "").unsafeRunSync()
+
+  val create: Update0 =
+    sql"""
+    CREATE TABLE carpark (
+      ship VARCHAR NOT NULL UNIQUE,
+      duration  INT
+    )
+  """.update
+  create.run.transact(xa).unsafeRunSync
 
   // Fix the error type to a String and the effect to IO
   type ExampleTransaction[A] = Transaction[IO, String, A]
@@ -26,7 +36,7 @@ object DoobieExample {
       42.pure[ConnectionIO].transaction
 
     def parkShip(ship: String, duration: Int): ExampleTransaction[Int] = {
-      val update: ConnectionIO[Int] = sql"insert into car park (ship, duration) values ($ship, $duration)".update.run
+      val update: ConnectionIO[Int] = sql"insert into carpark (ship, duration) values ($ship, $duration)".update.run
       update.transaction
     }
   }
@@ -43,4 +53,7 @@ object DoobieExample {
   import com.casualmiracles.transaction.catseffect.runner
 
   val res: RunResult[String, Boolean] = parkTheShipMarvin("enterprise", 1).unsafeAttemptRun
+
+  // the console will show the result after the println above in parkTheShipMarvin
+  println(res)
 }

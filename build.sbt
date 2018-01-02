@@ -132,4 +132,6 @@ lazy val examples = project.in(file("examples"))
   .dependsOn(catsEffect)
   .settings(
     libraryDependencies := coreDependencies ++
-      Seq("org.tpolecat" %% "doobie-core" % "0.5.0-M11"))
+      Seq(
+        "org.tpolecat" %% "doobie-core" % "0.5.0-M11",
+        "org.tpolecat" %% "doobie-h2" % "0.5.0-M11"))
