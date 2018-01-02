@@ -42,12 +42,16 @@ object DoobieExample extends App {
   }
 
   // use the store with a post commit
-  def parkTheShipMarvin(ship: String, duration: Int): ExampleTransaction[Boolean] =
+  def parkTheShipMarvin(ship: String, duration: Int): ExampleTransaction[Boolean] = {
+    def complainAbout(meaningOfLife: Int): ExampleTransaction[Unit] =
+      Transaction.onSuccess[IO, String](() ⇒ println(s"I know the meaning of life is $meaningOfLife, I have the brain the size of a planet. And I'm a parking attendant."))
+
     for {
       life ← Store.meaningOfLife
-      _ ← Transaction.onSuccess[IO, String](() ⇒ println(s"I know the meaning of life is $life, I have the brain the size of a planet. And I'm a parking attendant."))
+      _ ← complainAbout(life)
       parked ← Store.parkShip(ship, duration)
     } yield parked == 1
+  }
 
   // Park a ship
   import com.casualmiracles.transaction.catseffect.runner

@@ -54,8 +54,8 @@ final case class Transaction[F[_] : Monad, E, A](runF: F[Run[E, A]]) {
   /**
     * Syntax for flatMap
     */
-  def >>=[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
-    flatMap(f)
+//  def >>=[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
+//    flatMap(f)
 
   /**
     * The Kestrel combinator - apply a monadic function and discard the result while keeping the effect.
