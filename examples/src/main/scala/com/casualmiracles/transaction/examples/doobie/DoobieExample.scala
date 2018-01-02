@@ -16,7 +16,7 @@ object DoobieExample {
 
   object Store {
 
-    // something to convert from a connectionIO to a Transactiond
+    // something to convert from a ConnectionIO to an ExampleTransaction
     implicit class ToExampleTransaction[A](conn: ConnectionIO[A]) {
       def transaction: ExampleTransaction[A] =
         Transaction.lift(conn.transact(xa))
