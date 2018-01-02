@@ -1,5 +1,6 @@
 package com.casualmiracles.transaction.examples.doobie
 
+import cats.Monad
 import com.casualmiracles.transaction.{RunResult, Transaction}
 import doobie._
 import doobie.implicits._
@@ -24,6 +25,9 @@ object DoobieExample extends App {
   // Fix the error type to a String and the effect to IO
   type ExampleTransaction[A] = Transaction[IO, String, A]
 
+  // we need a Monad[ExampleTransaction] for the syntax used below - just because we can
+  implicit def transactionMonad: Monad[ExampleTransaction] = Transaction.transactionMonad[IO, String]
+
   object Store {
 
     // something to convert from a ConnectionIO to an ExampleTransaction
@@ -35,8 +39,8 @@ object DoobieExample extends App {
     def meaningOfLife: ExampleTransaction[Int] =
       42.pure[ConnectionIO].transaction
 
-    def parkShip(ship: String, duration: Int): ExampleTransaction[Int] = {
-      val update: ConnectionIO[Int] = sql"insert into carpark (ship, duration) values ($ship, $duration)".update.run
+    def parkShip(ship: String, duration: Int): ExampleTransaction[Boolean] = {
+      val update: ConnectionIO[Boolean] = sql"insert into carpark (ship, duration) values ($ship, $duration)".update.run.map(_ == 1)
       update.transaction
     }
   }
@@ -46,11 +50,8 @@ object DoobieExample extends App {
     def complainAbout(meaningOfLife: Int): ExampleTransaction[Unit] =
       Transaction.onSuccess[IO, String](() ⇒ println(s"I know the meaning of life is $meaningOfLife, I have the brain the size of a planet. And I'm a parking attendant."))
 
-    for {
-      life ← Store.meaningOfLife
-      _ ← complainAbout(life)
-      parked ← Store.parkShip(ship, duration)
-    } yield parked == 1
+    // using syntax >>= (flatMap) and >> which is flatMap discarding its argument
+    (Store.meaningOfLife >>= complainAbout) >> Store.parkShip(ship, duration)
   }
 
   // Park a ship
