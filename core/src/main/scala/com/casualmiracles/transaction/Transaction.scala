@@ -112,6 +112,15 @@ object Transaction {
   def failure[F[_]: Monad, E, A](err: E): Transaction[F, E, A] =
     fromEither(Left[E, A](err))
 
+  def lift[F[_], E, A](value: F[A])(implicit monadF: Monad[F]): Transaction[F, E, A] =
+    Transaction(monadF.map(value)(v ⇒ Run(Right[E, A](v))))
+
+  def onSuccess[F[_]: Monad, E](f: () ⇒ Unit): Transaction[F, E, Unit] =
+    pure[F, E, Unit](()).onSuccess(f)
+
+  def onFailure[F[_]: Monad, E](f: () ⇒ Unit): Transaction[F, E, Unit] =
+    pure[F, E, Unit](()).onFailure(f)
+
   implicit def transactionMonad[F[_], E](implicit monadF: Monad[F]): Monad[Transaction[F, E, ?]] =
     new Monad[Transaction[F, E, ?]] {
       override def pure[A](x: A): Transaction[F, E, A] =

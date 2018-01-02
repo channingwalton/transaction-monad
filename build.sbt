@@ -124,3 +124,12 @@ lazy val catsEffect = project.in(file("cats-effect"))
   .settings(
       libraryDependencies := coreDependencies ++
         Seq("org.typelevel" %% "cats-effect" % "0.5"))
+
+
+lazy val examples = project.in(file("examples"))
+  .settings(noPublishSettings)
+  .settings(moduleName := "transaction-examples")
+  .dependsOn(catsEffect)
+  .settings(
+    libraryDependencies := coreDependencies ++
+      Seq("org.tpolecat" %% "doobie-core" % "0.5.0-M11"))
