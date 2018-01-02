@@ -26,7 +26,7 @@ object DoobieExample {
       42.pure[ConnectionIO].transaction
 
     def parkShip(ship: String, duration: Int): ExampleTransaction[Int] = {
-      val update: ConnectionIO[Int] = sql"insert into carpark (ship, duration) values ($ship, $duration)".update.run
+      val update: ConnectionIO[Int] = sql"insert into car park (ship, duration) values ($ship, $duration)".update.run
       Transaction.lift(update.transact(xa))
     }
   }
