@@ -3,11 +3,8 @@ package com.casualmiracles.transaction.examples.doobie
 import com.casualmiracles.transaction.Transaction
 import doobie._
 import doobie.implicits._
-import cats._
-import cats.data._
 import cats.effect._
 import cats.implicits._
-import com.casualmiracles.transaction.catseffect.TransactionIO
 
 object DoobieExample {
 
