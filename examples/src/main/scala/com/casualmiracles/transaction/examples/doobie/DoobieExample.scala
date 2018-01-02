@@ -6,6 +6,7 @@ import doobie._
 import doobie.implicits._
 import cats.effect._
 import cats.implicits._
+import com.casualmiracles.transaction.catseffect.TransactionIO
 import doobie.h2.H2Transactor
 
 object DoobieExample extends App {
@@ -26,7 +27,7 @@ object DoobieExample extends App {
   type ExampleTransaction[A] = Transaction[IO, String, A]
 
   // we need a Monad[ExampleTransaction] for the syntax used below - just because we can
-  implicit def transactionMonad: Monad[ExampleTransaction] = Transaction.transactionMonad[IO, String]
+  implicit def transactionMonad: Monad[ExampleTransaction] = TransactionIO.transactionIOMonad[String]
 
   object Store {
 
