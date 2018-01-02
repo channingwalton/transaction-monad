@@ -17,7 +17,7 @@ In several projects we ended up with a monad transformer stack of the form:
 Where _IO_ is an effect like scalaz or cats-effect _IO_, and _PostCommit_ is a function to run when the Transaction
 runs successfully.
 
-The PostCommit functions tend to be things like sending an email or update another system after a workflow transition has occurred. We don't want the
+The PostCommit functions tend to be things like sending an email or updating another system after a workflow transition has occurred. We don't want the
 email sent if the workflow transition failed to be successfully committed. (e.g. "Thanks for the $1M you've deposited today." when the deposit failed.)
 
 However, this effect stack is a little cumbersome so
