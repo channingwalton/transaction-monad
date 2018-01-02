@@ -17,6 +17,9 @@ In several projects we ended up with a monad transformer stack of the form:
 Where _IO_ is an effect like scalaz or cats-effect _IO_, and _PostCommit_ is a function to run when the Transaction
 runs successfully.
 
+The PostCommit functions tend to be things like sending an email or update another system after a workflow transition has occurred. We don't want the
+email sent if the workflow transition failed to be successfully committed. (e.g. "Thanks for the $1M you've deposited today." when the deposit failed.)
+
 However, this effect stack is a little cumbersome so
 
 ## The Monad to Rule Them All
@@ -48,3 +51,8 @@ libraryDependencies ++= Seq(
   "com.casualmiracles" %% "transaction-cats-effect" % "0.0.9",
   "org.typelevel" %% "cats-effect" % "0.5")
 ```
+
+## What Bothers Me About This?
+
+1. Does it help or is the original Monad Transformer stack adequate?
+2. The PostRun functions are as nasty as actors, they are just _() => Unit_.
