@@ -1,6 +1,6 @@
 package com.casualmiracles.transaction.examples.doobie
 
-import com.casualmiracles.transaction.Transaction
+import com.casualmiracles.transaction.{RunResult, Transaction}
 import doobie._
 import doobie.implicits._
 import cats.effect._
@@ -9,7 +9,7 @@ import cats.implicits._
 object DoobieExample {
 
   // The T R A N S A C T O R !
-  val xa = Transactor.fromDriverManager[IO]("org.postgresql.Driver", "jdbc:postgresql:world", "postgres", "")
+  val xa = Transactor.fromDriverManager[IO]("Driver", "jdbc:hmm:world", "blah", "blah")
 
   // Fix the error type to a String and the effect to IO
   type ExampleTransaction[A] = Transaction[IO, String, A]
@@ -38,4 +38,9 @@ object DoobieExample {
       _ ← Transaction.onSuccess[IO, String](() ⇒ println(s"I know the meaning of life is $life, I have the brain the size of a planet. And I'm a parking attendant."))
       parked ← Store.parkShip(ship, duration)
     } yield parked == 1
+
+  // Park a ship
+  import com.casualmiracles.transaction.catseffect.runner
+
+  val res: RunResult[String, Boolean] = parkTheShipMarvin("enterprise", 1).unsafeAttemptRun
 }
