@@ -20,7 +20,7 @@ runs successfully.
 The PostCommit functions tend to be things like sending an email or updating another system after a workflow transition has occurred. We don't want the
 email sent if the workflow transition failed to be successfully committed. (e.g. "Thanks for the $1M you've deposited today." when the deposit failed.)
 
-However, this effect stack is a little cumbersome so
+However, this effect stack is a little cumbersome so:
 
 ## The Monad to Rule Them All
 
