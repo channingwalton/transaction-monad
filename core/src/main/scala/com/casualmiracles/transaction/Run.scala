@@ -2,6 +2,12 @@ package com.casualmiracles.transaction
 
 final case class Run[A, B](res: Either[A, B], onFailure: OnFailure = OnFailure(), onSuccess: OnSuccess = OnSuccess()) {
 
+  def exists(f: B ⇒ Boolean): Boolean =
+    res.exists(f)
+
+  def forall(f: B ⇒ Boolean): Boolean =
+    res.forall(f)
+
   def getOrElse[BB >: B](default: => BB): BB =
     res.getOrElse(default)
 

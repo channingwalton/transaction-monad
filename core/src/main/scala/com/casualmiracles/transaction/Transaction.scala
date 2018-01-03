@@ -30,6 +30,15 @@ final case class Transaction[F[_] : Monad, A, B](runF: F[Run[A, B]]) {
     }
   }
 
+  def valueOr[BB >: B](f: A => BB): F[BB] =
+    fold(f, identity)
+
+  def forall(f: B => Boolean): F[Boolean] =
+    monadF.map(runF)(_.forall(f))
+
+  def exists(f: B => Boolean): F[Boolean] =
+    monadF.map(runF)(_.exists(f))
+  
   /**
     * Append a function to run on success
     */
