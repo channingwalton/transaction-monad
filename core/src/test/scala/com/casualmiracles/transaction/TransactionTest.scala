@@ -1,6 +1,7 @@
 package com.casualmiracles.transaction
 
 import cats.Id
+import com.casualmiracles.transaction.RunResult.{Failure, Success}
 import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
 
 class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
@@ -40,6 +41,34 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
       res.runF.onFailure.fs mustBe List(pc2, pc4)
       res.runF.onSuccess.fs.size mustBe 2
       res.runF.onSuccess.fs mustBe List(pc1, pc3)
+    }
+  }
+
+  "construct from" - {
+    "a success value" in {
+      Transaction.success(1).unsafeAttemptRun mustBe Success(1)
+    }
+
+    "a failure value" in {
+      Transaction.failure("oops").unsafeAttemptRun mustBe Failure("oops")
+    }
+
+    "an either" - {
+      "right" in {
+        Transaction.fromEither(Right(1)).unsafeAttemptRun mustBe Success(1)
+      }
+      "left" in {
+        Transaction.fromEither(Left("oops")).unsafeAttemptRun mustBe Failure("oops")
+      }
+    }
+
+    "an option" - {
+      "some" in {
+        Transaction.fromOption(Some(1), "oops").unsafeAttemptRun mustBe Success(1)
+      }
+      "none" in {
+        Transaction.fromOption(None, "oops").unsafeAttemptRun mustBe Failure("oops")
+      }
     }
   }
 }
