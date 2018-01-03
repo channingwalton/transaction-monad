@@ -2,41 +2,53 @@ package com.casualmiracles.transaction
 
 import cats.Monad
 
-final case class Transaction[F[_] : Monad, E, A](runF: F[Run[E, A]]) {
+final case class Transaction[F[_] : Monad, A, B](runF: F[Run[A, B]]) {
 
   private val monadF = implicitly[Monad[F]]
+
+  def fold[C](fa: A => C, fb: B => C): F[C] =
+    monadF.map(runF)(_.fold(fa, fb))
+
+  def isLeft: F[Boolean] =
+    monadF.map(runF)(_.isLeft)
+
+  def isRight: F[Boolean] =
+    monadF.map(runF)(_.isRight)
+
+  def swap: Transaction[F, B, A] =
+    Transaction(monadF.map(runF)(_.swap))
 
   /**
     * Append a function to run on success
     */
-  def onSuccess(f: () ⇒ Unit): Transaction[F, E, A] =
+  def onSuccess(f: () ⇒ Unit): Transaction[F, A, B] =
     Transaction(monadF.map(runF)(_.appendSuccess(OnSuccess(f))))
 
   /**
     * Append a function to run on failure
     */
-  def onFailure(f: () ⇒ Unit): Transaction[F, E, A] =
+  def onFailure(f: () ⇒ Unit): Transaction[F, A, B] =
     Transaction(monadF.map(runF)(_.appendFailure(OnFailure(f))))
 
-  def map[B](f: A ⇒ B): Transaction[F, E, B] =
+  def map[C](f: B ⇒ C): Transaction[F, A, C] =
     Transaction(monadF.map(runF)(_.map(f)))
 
-  def flatMap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, B] =
+  def flatMap[C](f: B ⇒ Transaction[F, A, C]): Transaction[F, A, C] =
     Transaction {
       monadF.flatMap(runF) {
-        thisRun: Run[E, A] ⇒ {
+        thisRun: Run[A, B] ⇒ {
           thisRun.res.fold(
             // this is a left so we don't flatMap it but it does need to be
             // cast to the appropriate type which is safe because its a Left, the Right
             // doesn't actually exist
-            _ ⇒ this.asInstanceOf[Transaction[F, E, B]].runF,
+            _ ⇒ this.asInstanceOf[Transaction[F, A, C]].runF,
 
             // this is a right so we can flatMap it
-            (thisRightValue: A) ⇒ {
-              val newTransaction: Transaction[F, E, B] = f(thisRightValue)
+            (thisRightValue: B) ⇒ {
+              val newTransaction: Transaction[F, A, C] = f(thisRightValue)
 
               // carry the existing post commit actions over to the result
-              monadF.map(newTransaction.runF) { newRun: Run[E, B] ⇒
+              monadF.map(newTransaction.runF) { newRun: Run[A, C] ⇒
                 Run(newRun.res, thisRun.onFailure ++ newRun.onFailure, thisRun.onSuccess ++ newRun.onSuccess)
               }
             }
@@ -48,33 +60,33 @@ final case class Transaction[F[_] : Monad, E, A](runF: F[Run[E, A]]) {
   /**
     * The Kestrel combinator - apply a monadic function and discard the result while keeping the effect.
     */
-  def flatTap[B](f: A ⇒ Transaction[F, E, B]): Transaction[F, E, A] =
+  def flatTap[C](f: B ⇒ Transaction[F, A, C]): Transaction[F, A, B] =
     flatMap(a ⇒ f(a).map(_ ⇒ a))
 
   /**
     * Apply a function to the value and discard the result.
     */
-  def tap[B](f: A ⇒ B): Transaction[F, E, A] =
+  def tap[C](f: B ⇒ C): Transaction[F, A, B] =
     map(a ⇒ { f(a);  a })
 
   /**
     * Map the value to Unit.
     */
-  def void: Transaction[F, E, Unit] =
+  def void: Transaction[F, A, Unit] =
     map(_ ⇒ ())
 
   /**
-    * If T is an Option[B] then map None to an error and Some to the value.
+    * If T is an Option[C] then map None to an error and Some to the value.
     */
-  def mapOption[B](err: E)(implicit ev: A =:= Option[B]): Transaction[F, E, B] =
-    flatMap(_.fold(Transaction.failure[F, E, B](err))(Transaction.success(_)))
+  def mapOption[C](err: A)(implicit ev: B =:= Option[C]): Transaction[F, A, C] =
+    flatMap(_.fold(Transaction.failure[F, A, C](err))(Transaction.success(_)))
 
   /**
     * Run this transaction, executing side-effects on success or failure.
     * Note that if the attempt to run fails with an Exception,
     * no side-effects will be run.
     */
-  def unsafeAttemptRun(implicit runner: TransactionRunner[F]): RunResult[E, A] = {
+  def unsafeAttemptRun(implicit runner: TransactionRunner[F]): RunResult[A, B] = {
     runner.unsafeRun(this) match {
       case Left(t) ⇒ RunResult.Error(t)
 
