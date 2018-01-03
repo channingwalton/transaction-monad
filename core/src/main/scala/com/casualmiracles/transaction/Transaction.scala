@@ -91,6 +91,9 @@ final case class Transaction[F[_] : Monad, E, A](runF: F[Run[E, A]]) {
 
 object Transaction {
 
+  def fromOption[F[_]: Monad, E, A](value: Option[A], e: ⇒ E): Transaction[F, E, A] =
+    fromEither[F, E, A](value.fold[Either[E, A]](Left(e))(Right(_)))
+
   def fromEither[F[_], E, A](value: Either[E, A])(implicit monad: Monad[F]): Transaction[F, E, A] =
     Transaction(monad.pure(Run(value)))
 
