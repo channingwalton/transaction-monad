@@ -2,6 +2,9 @@ package com.casualmiracles.transaction
 
 final case class Run[A, B](res: Either[A, B], onFailure: OnFailure = OnFailure(), onSuccess: OnSuccess = OnSuccess()) {
 
+  def getOrElse[BB >: B](default: => BB): BB =
+    res.getOrElse(default)
+
   def fold[C](fe: A ⇒ C, fb: B ⇒ C): C =
     res.fold(fe, fb)
 

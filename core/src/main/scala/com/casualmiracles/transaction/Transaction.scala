@@ -18,6 +18,18 @@ final case class Transaction[F[_] : Monad, A, B](runF: F[Run[A, B]]) {
   def swap: Transaction[F, B, A] =
     Transaction(monadF.map(runF)(_.swap))
 
+  def getOrElse[BB >: B](default: => BB): F[BB] =
+    monadF.map(runF)(_.getOrElse(default))
+
+  def getOrElseF[BB >: B](default: => F[BB]): F[BB] = {
+    monadF.flatMap(runF) { run ⇒
+      run.res match {
+        case Left(_) => default
+        case Right(b) => monadF.pure(b)
+      }
+    }
+  }
+
   /**
     * Append a function to run on success
     */
