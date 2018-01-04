@@ -49,7 +49,8 @@ object MTStack {
 
   def run[A](pcs: PCStateES[A]): Either[Throwable, A] = {
     val res = pcs.value.run(Nil, Nil).value
-    println(res._1.mkString("\n"))
+    println(("LOGS:" :: res._1).mkString("\n"))
+    println("\nPostCommit functions:")
     res._2.foreach {
       case PostCommit(desc, f) ⇒
         println(s"Running: $desc")
@@ -67,22 +68,27 @@ object MTStackTest extends App {
   val x =
     for {
       _ <- log("Hi")
-      y ← liftE(Right("Some stuff")).add(PostCommit("did some stuff", () ⇒ println("Did some stuff.")))
-      _ ← postCommit(PostCommit("all done", () ⇒ println("We did it!")))
+      y ← liftE(Right("Some stuff")).add(PostCommit("did some stuff", () ⇒ println("  Did some stuff.")))
       _ <- log("Bye")
+      _ ← postCommit(PostCommit("all done", () ⇒ println("  We did it!")))
     } yield y
 
-  println("Result: " + run(x))
+  println("\nResult:\n" + run(x))
 
-  /*
-  Hi
-  Bye
-  Running: did some stuff
+/*
+LOGS:
+Hi
+Bye
+
+PostCommit functions:
+Running: did some stuff
   Did some stuff.
-  Ran: did some stuff
-  Running: all done
+Ran: did some stuff
+Running: all done
   We did it!
-  Ran: all done
-  Result: Right(Some stuff)
-   */
+Ran: all done
+
+Result:
+Right(Some stuff)
+*/
 }
