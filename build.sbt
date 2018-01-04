@@ -104,7 +104,7 @@ lazy val noPublishSettings = Seq(
 lazy val root =
   project.in(file("."))
     .settings(noPublishSettings)
-      .aggregate(core, catsEffect)
+      .aggregate(core, catsEffect, experiments)
 
 lazy val coreSettings = commonSettings
 
@@ -137,3 +137,12 @@ lazy val examples = project.in(file("examples"))
       Seq(
         "org.tpolecat" %% "doobie-core" % "0.5.0-M11",
         "org.tpolecat" %% "doobie-h2" % "0.5.0-M11"))
+
+lazy val experimentsSettings = commonSettings
+
+lazy val experiments = project.in(file("experiments"))
+  .settings(noPublishSettings)
+  .settings(moduleName := "transaction-experiments")
+  .settings(experimentsSettings:_*)
+  .settings(
+    libraryDependencies := coreDependencies)
