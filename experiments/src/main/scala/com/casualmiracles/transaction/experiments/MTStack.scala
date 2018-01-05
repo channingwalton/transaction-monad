@@ -1,9 +1,11 @@
 package com.casualmiracles.transaction.experiments
 
-import cats.data.{EitherT, ReaderWriterState}
+import cats.data.{EitherT, ReaderWriterStateT}
 import cats.instances.list._
 import cats.syntax.all._
-import cats.{Applicative, Id}
+import cats.{Applicative, Id, Monad}
+
+final case class PostCommit(description: String, item: () => Unit)
 
 /**
   * Is the MonadTransformer Stack easier?
@@ -14,14 +16,12 @@ import cats.{Applicative, Id}
   *
   * This was based on slide 88+ in https://speakerdeck.com/mpilquist/scalaz-state-monad
   */
-object MTStack {
-  final case class PostCommit(description: String, item: () => Unit)
+class TransactionBuilder[F[_]: Monad] {
 
-  type TransactionState[A] = ReaderWriterState[List[String], List[String], List[PostCommit], A]
-  type ET[F[_], A] = EitherT[F, Throwable, A]
-  type Transaction[A] = ET[TransactionState, A]
+  type TransactionState[A] = ReaderWriterStateT[F, List[String], List[String], List[PostCommit], A]
+  type Transaction[A] = EitherT[TransactionState, Throwable, A]
 
-  object PCStateES {
+  object Transaction {
     def apply[A](s: TransactionState[Either[Throwable, A]]): Transaction[A] = EitherT(s)
 
     def liftEither[A](e: Either[Throwable, A]): Transaction[A] = apply(Applicative[TransactionState].point(e))
@@ -29,27 +29,33 @@ object MTStack {
     def liftS[A](s: TransactionState[A]): Transaction[A] = EitherT.liftF(s)
 
     def log(msg: String): Transaction[Unit] = liftS {
-      ReaderWriterState[List[String], List[String], List[PostCommit], Unit] {
-        case (_, s) => (List(msg), s, ()).pure[Id]
+      ReaderWriterStateT[F, List[String], List[String], List[PostCommit], Unit] {
+        case (_, s) => (List(msg), s, ()).pure[F]
       }
     }
 
     def postCommit(pc: PostCommit): Transaction[Unit] =
       liftS {
-        ReaderWriterState[List[String], List[String], List[PostCommit], Unit] {
-          case (_, s) => (Nil, s :+ pc, ()).pure[Id]
+        ReaderWriterStateT[F, List[String], List[String], List[PostCommit], Unit] {
+          case (_, s) => (List.empty[String], s :+ pc, ()).pure[F]
         }
       }
 
     implicit class PCStateESSyntax[A](s: Transaction[A]) {
       def add(pc: PostCommit): Transaction[A] =
-        PCStateES(s.value.modify(pcs ⇒ pc :: pcs))
+        Transaction(s.value.modify(pcs ⇒ pc :: pcs))
     }
   }
+}
+
+object TransactionTest extends App {
+  val transactionBuilder = new TransactionBuilder[Id]
+  import transactionBuilder._
+  import transactionBuilder.Transaction._
 
   def run[A](pcs: Transaction[A]): Either[Throwable, A] = {
-    val res = pcs.value.run(Nil, Nil).value
-    println(("LOGS:" :: res._1).mkString("\n"))
+    val res = pcs.value.run(Nil, Nil)
+      println(("LOGS:" :: res._1).mkString("\n"))
     println("\nPostCommit functions:")
     res._2.foreach {
       case PostCommit(desc, f) ⇒
@@ -59,11 +65,6 @@ object MTStack {
     }
     res._3
   }
-}
-
-object MTStackTest extends App {
-  import MTStack._
-  import PCStateES._
 
   val x =
     for {
