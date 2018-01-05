@@ -13,12 +13,12 @@ trait TransactionRunner[F[_]] {
     * @tparam A success type
     * @return Throwable (non fatal) or a Run[E, A]
     */
-  def unsafeRun[E, A](transaction: Transaction[F, E, A]): Either[Throwable, Run[E, A]]
+  def unsafeRun[E, A](transaction: TransactionF[F, E, A]): Either[Throwable, Result[E, A]]
 }
 
 object TransactionRunner {
   implicit def identityRunner: TransactionRunner[Id] = new TransactionRunner[Id] {
-    override def unsafeRun[E, A](transaction: Transaction[Id, E, A]): Either[Throwable, Run[E, A]] =
-      Right(transaction.runF)
+    override def unsafeRun[E, A](transaction: TransactionF[Id, E, A]): Either[Throwable, Result[E, A]] =
+      Right(transaction.value.runF(Nil, Nil))
   }
 }

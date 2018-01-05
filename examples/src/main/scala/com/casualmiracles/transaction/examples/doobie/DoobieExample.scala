@@ -1,7 +1,6 @@
 package com.casualmiracles.transaction.examples.doobie
 
-import cats.Monad
-import com.casualmiracles.transaction.{RunResult, Transaction}
+import com.casualmiracles.transaction.TransactionF
 import doobie._
 import doobie.implicits._
 import cats.effect._
@@ -24,17 +23,14 @@ object DoobieExample extends App {
   create.run.transact(xa).unsafeRunSync
 
   // Fix the error type to a String and the effect to IO
-  type ExampleTransaction[A] = Transaction[IO, String, A]
-
-  // we need a Monad[ExampleTransaction] for the syntax used below - just because we can
-  implicit def transactionMonad: Monad[ExampleTransaction] = TransactionIO.transactionIOMonad[String]
+  type ExampleTransaction[A] = TransactionF[IO, String, A]
 
   object Store {
 
     // something to convert from a ConnectionIO to an ExampleTransaction
     implicit class ToExampleTransaction[A](conn: ConnectionIO[A]) {
       def transaction: ExampleTransaction[A] =
-        Transaction.lift(conn.transact(xa))
+        TransactionIO.lift(conn.transact(xa))
     }
 
     def meaningOfLife: ExampleTransaction[Int] =
