@@ -17,37 +17,37 @@ import cats.{Applicative, Id}
 object MTStack {
   final case class PostCommit(description: String, item: () => Unit)
 
-  type PCStateS[A] = ReaderWriterState[List[String], List[String], List[PostCommit], A]
+  type TransactionState[A] = ReaderWriterState[List[String], List[String], List[PostCommit], A]
   type ET[F[_], A] = EitherT[F, Throwable, A]
-  type PCStateES[A] = ET[PCStateS, A]
+  type Transaction[A] = ET[TransactionState, A]
 
   object PCStateES {
-    def apply[A](s: PCStateS[Either[Throwable, A]]): PCStateES[A] = EitherT(s)
+    def apply[A](s: TransactionState[Either[Throwable, A]]): Transaction[A] = EitherT(s)
 
-    def liftE[A](e: Either[Throwable, A]): PCStateES[A] = apply(Applicative[PCStateS].point(e))
+    def liftEither[A](e: Either[Throwable, A]): Transaction[A] = apply(Applicative[TransactionState].point(e))
 
-    def liftS[A](s: PCStateS[A]): PCStateES[A] = EitherT.liftF(s)
+    def liftS[A](s: TransactionState[A]): Transaction[A] = EitherT.liftF(s)
 
-    def log(msg: String): PCStateES[Unit] = liftS {
+    def log(msg: String): Transaction[Unit] = liftS {
       ReaderWriterState[List[String], List[String], List[PostCommit], Unit] {
         case (_, s) => (List(msg), s, ()).pure[Id]
       }
     }
 
-    def postCommit(pc: PostCommit): PCStateES[Unit] =
+    def postCommit(pc: PostCommit): Transaction[Unit] =
       liftS {
         ReaderWriterState[List[String], List[String], List[PostCommit], Unit] {
           case (_, s) => (Nil, s :+ pc, ()).pure[Id]
         }
       }
 
-    implicit class PCStateESSyntax[A](s: PCStateES[A]) {
-      def add(pc: PostCommit): PCStateES[A] =
+    implicit class PCStateESSyntax[A](s: Transaction[A]) {
+      def add(pc: PostCommit): Transaction[A] =
         PCStateES(s.value.modify(pcs ⇒ pc :: pcs))
     }
   }
 
-  def run[A](pcs: PCStateES[A]): Either[Throwable, A] = {
+  def run[A](pcs: Transaction[A]): Either[Throwable, A] = {
     val res = pcs.value.run(Nil, Nil).value
     println(("LOGS:" :: res._1).mkString("\n"))
     println("\nPostCommit functions:")
@@ -68,7 +68,7 @@ object MTStackTest extends App {
   val x =
     for {
       _ <- log("Hi")
-      y ← liftE(Right("Some stuff")).add(PostCommit("did some stuff", () ⇒ println("  Did some stuff.")))
+      y ← liftEither(Right("Some stuff")).add(PostCommit("did some stuff", () ⇒ println("  Did some stuff.")))
       _ <- log("Bye")
       _ ← postCommit(PostCommit("all done", () ⇒ println("  We did it!")))
     } yield y
