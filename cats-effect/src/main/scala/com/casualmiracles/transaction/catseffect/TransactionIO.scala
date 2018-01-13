@@ -5,7 +5,7 @@ import com.casualmiracles.transaction.{TransactionBuilder, TransactionF}
 
 object TransactionIO {
 
-  private def builder[E] = new TransactionBuilder[IO, E]
+  def builder[E] = new TransactionBuilder[IO, E]
 
   def fromEither[E, A](value: Either[E, A]): TransactionF[IO, E, A] =
     builder[E].liftEither(value)
@@ -19,10 +19,7 @@ object TransactionIO {
   def lift[E, A](value: IO[A]): TransactionF[IO, E, A] =
     builder[E].liftF(value)
 
-//  def onSuccess[E](f: () ⇒ Unit): TransactionF[IO, E, Unit] =
-//    Transaction.onSuccess(f)
-//
-//  def onFailure[E](f: () ⇒ Unit): TransactionF[IO, E, Unit] =
-//    Transaction.onFailure(f)
-//
+  def onSuccess[E](description: String, f: () ⇒ Unit): TransactionF[IO, E, Unit] =
+    builder.postRun(description, f)
+
 }

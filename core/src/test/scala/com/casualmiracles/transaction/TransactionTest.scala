@@ -1,49 +1,37 @@
 package com.casualmiracles.transaction
 
 import cats.Id
+import cats.instances.list._
 import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
 
 class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
 
-  type TestTransaction[A] = TransactionF[Id, String, A]
+  val builder: TransactionBuilder[Id, String] = new TransactionBuilder[Id, String]
 
-  val builder = new TransactionBuilder[Id, String]
+  import builder.TransactionSyntax
 
-  def testTransaction[A](a: A): TestTransaction[A] =
-    builder.liftEither(Right(a))
+  "post commits" - {
+    "must be carried by map" in {
+      val pc1 = () ⇒ ()
 
-//  "post commits" - {
-//    "must be carried by map" in {
-//      val pc1 = () ⇒ ()
-//      val pc2 = () ⇒ ()
-//
-//      val t = Transaction[Id, String, Int](Run(Right[String, Int](1), OnFailure(List(pc1)), OnSuccess(List(pc2))))
-//
-//      val m = t.map(_ * 2)
-//
-//      m.runF.onFailure.fs.size mustBe 1
-//      m.runF.onFailure.fs.head mustBe pc1
-//      m.runF.onSuccess.fs.size mustBe 1
-//      m.runF.onSuccess.fs.head mustBe pc2
-//    }
-//
-//    "must be concatenated by flatMap" in {
-//      val pc1 = () ⇒ ()
-//      val pc2 = () ⇒ ()
-//      val pc3 = () ⇒ ()
-//      val pc4 = () ⇒ ()
-//
-//      val t1 = Transaction.success[Id, String, Int](1).onSuccess(pc1).onFailure(pc2)
-//      val t2 = Transaction.success[Id, String, Int](1).onSuccess(pc3).onFailure(pc4)
-//
-//      val res = t1.flatMap(_ ⇒ t2)
-//
-//      res.runF.onFailure.fs.size mustBe 2
-//      res.runF.onFailure.fs mustBe List(pc2, pc4)
-//      res.runF.onSuccess.fs.size mustBe 2
-//      res.runF.onSuccess.fs mustBe List(pc1, pc3)
-//    }
-//  }
+      val t = builder.point(1).postRun("ok", pc1)
+
+      val m = t.map(_ * 2)
+
+      m.value.run(Nil, Nil)._2.size mustBe 1
+    }
+
+    "must be concatenated by flatMap" in {
+      val pc1 = () ⇒ ()
+      val pc2 = () ⇒ ()
+
+      val t1 = builder.point(1).postRun("first", pc1)
+      val t2 = builder.point(1).postRun("second", pc2)
+
+      val res = t1.flatMap(_ ⇒ t2)
+
+      res.value.run(Nil, Nil)._2.size mustBe 2
+  }
 //
 //  "construct from" - {
 //    "a success value" in {
@@ -71,5 +59,5 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
 //        Transaction.fromOption(None, "oops").unsafeAttemptRun mustBe Failure("oops")
 //      }
 //    }
-//  }
+  }
 }
