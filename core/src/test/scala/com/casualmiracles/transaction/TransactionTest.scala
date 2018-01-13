@@ -1,7 +1,6 @@
 package com.casualmiracles.transaction
 
 import cats.Id
-import cats.instances.list._
 import com.casualmiracles.transaction.Result._
 import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
 

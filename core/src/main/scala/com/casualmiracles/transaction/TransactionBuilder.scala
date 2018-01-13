@@ -1,19 +1,33 @@
 package com.casualmiracles.transaction
 
 import cats.data.{EitherT, ReaderWriterStateT}
-import cats.instances.list._
 import cats.syntax.all._
 import cats.Monad
+import cats.kernel.Monoid
 
 /**
   * This is a stack of EitherT over ReaderWriterStateT that supports
   * text logging, post commit functions as state and a value of Either[Throwable, A],
   * with F as the effect.
+  *
+  * Once you've constructed this builder, you can import `builder._` so that
+  * you can use its methods, its syntax, and get the list monoid so you don't
+  * need to remember to import it from cats. That last point is important
+  * because if you don't get the list monoid then you will get complex
+  * complication errors about missing implicit instances for Monad that
+  * will mislead and frustrate you.
+  *
   */
 class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
 
   type TransState[A] = TransactionStateF[F, A]
   type Transaction[A] = EitherT[TransState, E, A]
+
+  /** This is here so that when the builder is used, you can `import builder._`
+   * and not suffer the pain of misleading compiler errors about missing implicit
+   * instances for Monad[...]
+   */
+  implicit val listMonoid: Monoid[List[String]] = cats.instances.all.catsKernelStdMonoidForList
 
   def point[A](a: A): Transaction[A] =
     success(a)
