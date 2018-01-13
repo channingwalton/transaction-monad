@@ -85,7 +85,7 @@ def publishSettings: Seq[Setting[_]] = Seq(
     Developer(
       id    = "channingwalton",
       name  = "Channing Walton",
-      email = "channing.walton@undercsore.io",
+      email = "channing.walton@underscore.io",
       url   = url("http://underscore.io/")
     )
   ),
