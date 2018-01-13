@@ -27,7 +27,14 @@ However, this effect stack is a little cumbersome so this project wraps that up 
 The [TransactionBuilder](core/src/main/scala/com/casualmiracles/transaction/TransactionBuilder.scala) helps you build Transaction instances for
 a given effect and also to run the transaction.
 
-[TransactionTest](core/src/test/scala/com/casualmiracles/transaction/TransactionTest.scala) gives some examlples of use.
+A note of caution. Once you've constructed this builder, you can import `builder._` so that
+you can use its methods, its syntax, and get the list monoid so you don't
+need to remember to import it from cats. This last point is important
+because if you don't get the list monoid, then you will get complex
+complication errors about missing implicit instances for Monad that
+will mislead and frustrate you.
+
+[TransactionTest](core/src/test/scala/com/casualmiracles/transaction/TransactionTest.scala) gives some examples of use.
 
 The [TransactionRunner](core/src/main/scala/com/casualmiracles/transaction/TransactionRunner.scala) is used to run a transaction for a given effect.
 
