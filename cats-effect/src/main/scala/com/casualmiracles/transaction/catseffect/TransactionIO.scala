@@ -19,7 +19,7 @@ object TransactionIO {
   def lift[E, A](value: IO[A]): TransactionF[IO, E, A] =
     builder[E].liftF(value)
 
-  def onSuccess[E](description: String, f: () ⇒ Unit): TransactionF[IO, E, Unit] =
-    builder.postRun(description, f)
+  def onSuccess[E](f: () ⇒ Unit): TransactionF[IO, E, Unit] =
+    builder.postRun(f)
 
 }

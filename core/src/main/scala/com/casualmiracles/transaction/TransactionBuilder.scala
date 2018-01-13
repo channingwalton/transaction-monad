@@ -15,9 +15,6 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
   type TransState[A] = TransactionStateF[F, A]
   type Transaction[A] = EitherT[TransState, E, A]
 
-  def apply[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]]): Transaction[A] =
-    EitherT(s)
-
   def point[A](a: A): Transaction[A] =
     success(a)
 
@@ -32,12 +29,8 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
     apply(value)
   }
 
-  def liftOption[A](option: Option[A], error: E) =
+  def liftOption[A](option: Option[A], error: E): Transaction[A] =
     liftEither(option.fold[Either[E, A]](Left(error))(Right(_)))
-
-  def liftS[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], A]): Transaction[A] = {
-    EitherT.liftF(s)
-  }
 
   def liftF[A](s: F[A]): Transaction[A] = apply {
     ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]] {
@@ -51,8 +44,8 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
     }
   }
 
-  def postRun(description: String, f: () ⇒ Unit): Transaction[Unit] =
-    postRun(PostRun(description, f))
+  def postRun(f: () ⇒ Unit): Transaction[Unit] =
+    postRun(PostRun(f))
 
   def postRun(pc: PostRun): Transaction[Unit] =
     liftS {
@@ -61,25 +54,30 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
       }
     }
 
+  private def liftS[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], A]): Transaction[A] =
+    EitherT.liftF(s)
+
+  private def apply[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]]): Transaction[A] =
+    EitherT(s)
+
   implicit class TransactionSyntax[A](transaction: Transaction[A]) {
 
-    def postRun(description: String, f: () ⇒ Unit): Transaction[A] =
-      postRun(PostRun(description, f))
+    def postRun(f: () ⇒ Unit): Transaction[A] =
+      postRun(PostRun(f))
 
     def postRun(pc: PostRun): Transaction[A] =
       apply(transaction.value.modify(pcs ⇒ pc :: pcs))
 
-//TODO the log and PostRun descriptions need to be used?
     def unsafeRun(implicit runner: TransactionRunner[F]): Result[E, A] =
       runner.unsafeRun(transaction) match {
         case Left(t) ⇒ Result.Error(t)
 
-        case Right((_, _, Left(e))) ⇒
-          Result.Failure(e)
+        case Right((logs, _, Left(e))) ⇒
+          Result.Failure(logs, e)
 
-        case Right((_, f, Right(a))) ⇒
+        case Right((logs, f, Right(a))) ⇒
           f.foreach(_.f())
-          Result.Success(a)
+          Result.Success(logs, a)
       }
   }
 }

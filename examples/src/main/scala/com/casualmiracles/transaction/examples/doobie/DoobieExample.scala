@@ -51,7 +51,7 @@ object DoobieExample extends App {
   // use the store with a post commit
   def parkTheShipMarvin(ship: String, duration: Int): ExampleTransaction[Boolean] = {
     def complainAbout(meaningOfLife: Int): ExampleTransaction[Unit] =
-      builder.postRun(PostRun("", () ⇒ println(s"I know the meaning of life is $meaningOfLife, I have the brain the size of a planet. And I'm a parking attendant.")))
+      builder.postRun(PostRun(() ⇒ println(s"I know the meaning of life is $meaningOfLife, I have the brain the size of a planet. And I'm a parking attendant.")))
 
     // using syntax >>= (flatMap) and >> which is flatMap discarding its argument
     (Store.meaningOfLife >>= complainAbout) >> Store.parkShip(ship, duration)

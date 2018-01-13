@@ -11,8 +11,8 @@ package object transaction {
   type RunResult[E, A] = (List[String], List[PostRun], Either[E, A])
 
   implicit class TransactionFSyntax[F[_]: Functor, E, A](trans: TransactionF[F, E, A]) {
-    def onSuccess(description: String, f: () ⇒ Unit): TransactionF[F, E, A] = {
-      EitherT { trans.value.modify(_ :+ PostRun(description, f)) }
+    def onSuccess(f: () ⇒ Unit): TransactionF[F, E, A] = {
+      EitherT { trans.value.modify(_ :+ PostRun(f)) }
     }
   }
 }

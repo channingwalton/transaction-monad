@@ -12,14 +12,14 @@ class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
   "Success" in {
     assertTransaction(
       TransactionIO.success[String, String]("hi"),
-      Result.Success[String, String]("hi"), true)
+      Result.Success[String, String](Nil, "hi"), true)
   }
 
   "Failure" - {
     "when the result is a failure" in {
       assertTransaction(
         TransactionIO.failure[String, String]("oops"),
-        Result.Failure[String, String]("oops"), false)
+        Result.Failure[String, String](Nil, "oops"), false)
     }
 
     "when a non-fatal exception is thrown" in {
@@ -33,7 +33,7 @@ class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
   private def assertTransaction[E, A](trans: TransactionF[IO, String, A], result: Result[E, A], onSuccessRun: Boolean) = {
     var onSuccess = false
 
-    val transWithFunctions = trans.postRun("", () ⇒ onSuccess = true)
+    val transWithFunctions = trans.postRun(() ⇒ onSuccess = true)
 
     transWithFunctions.unsafeRun mustBe result
 
