@@ -4,7 +4,7 @@
 
 
 The Transaction Monad represents a transactional operation that may or may not be successful (much like Either),
-with functions to run depending on the success or failure of the transaction.
+with functions to run depending on the success of the transaction.
 
 ## Motivation
 
@@ -20,20 +20,18 @@ runs successfully.
 The PostCommit functions tend to be things like sending an email or updating another system after a workflow transition has occurred. We don't want the
 email sent if the workflow transition failed to be successfully committed. (e.g. "Thanks for the $1M you've deposited today." when the deposit failed.)
 
-However, this effect stack is a little cumbersome so:
+However, this effect stack is a little cumbersome so this project wraps that up for you.
 
-## The Monad to Rule Them All
+## Transaction Builder
 
-[Transaction](core/src/main/scala/com/casualmiracles/transaction/Transaction.scala) wraps up the stack described above in a new type to make
-it simpler to understand and use.
+The [TransactionBuilder](core/src/main/scala/com/casualmiracles/transaction/TransactionBuilder.scala) helps you build Transaction instances for
+a given effect and also to run the transaction.
 
-    final case class Transaction[F[_] : Monad, E, A](run: F[Run[E, A]])
+[TransactionTest](core/src/test/scala/com/casualmiracles/transaction/TransactionTest.scala) gives some examlples of use.
 
-where [Run](core/src/main/scala/com/casualmiracles/transaction/Run.scala) wraps an Either value, and functions
-that will be run after the transaction is run.
+The [TransactionRunner](core/src/main/scala/com/casualmiracles/transaction/TransactionRunner.scala) is used to run a transaction for a given effect.
 
-_Transaction.unsafeRun_ will execute the transaction given an implicit
-[TransactionRunner](core/src/main/scala/com/casualmiracles/transaction/TransactionRunner.scala).
+## Cats Effect
 
 The core module is supplemented by a second module, _cats-effect_, that provides _TransactionIO_
 to build and run a _Transaction[cats.effect.IO, E, A]_, and a [TransactionRunner[IO]](core/src/main/scala/com/casualmiracles/transaction/TransactionRunner.scala).
