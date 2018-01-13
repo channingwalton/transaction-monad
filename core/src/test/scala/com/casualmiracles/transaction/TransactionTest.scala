@@ -62,4 +62,19 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
       }
     }
   }
+
+  "logs" - {
+    "from syntax" in {
+      val t = success(1).log("a log")
+      t.unsafeRun mustBe Success(List("a log"), 1)
+    }
+
+    "carried by map" in {
+      success(1).log("a log").map(_ + 1).unsafeRun mustBe Success(List("a log"), 2)
+    }
+
+    "concatenated by flatMap" in {
+      success(1).log("log 1").flatMap(a ⇒ success(a * 2).log("log 2")).unsafeRun mustBe Success(List("log 1", "log 2"), 2)
+    }
+  }
 }

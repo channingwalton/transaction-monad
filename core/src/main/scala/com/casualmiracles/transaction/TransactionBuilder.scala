@@ -68,6 +68,9 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
     def postRun(pc: PostRun): Transaction[A] =
       apply(transaction.value.modify(pcs ⇒ pc :: pcs))
 
+    def log(msg: String): Transaction[A] =
+      apply(transaction.value.mapWritten(_ :+ msg))
+
     def unsafeRun(implicit runner: TransactionRunner[F]): Result[E, A] =
       runner.unsafeRun(transaction) match {
         case Left(t) ⇒ Result.Error(t)
