@@ -86,7 +86,7 @@ def publishSettings: Seq[Setting[_]] = Seq(
       id    = "channingwalton",
       name  = "Channing Walton",
       email = "channing.walton@underscore.io",
-      url   = url("http://underscore.io/")
+      url   = url("https://underscore.io/")
     )
   ),
   pomExtra := <licenses>
