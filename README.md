@@ -49,8 +49,3 @@ libraryDependencies ++= Seq(
   "com.casualmiracles" %% "transaction-cats-effect" % "0.0.12",
   "org.typelevel" %% "cats-effect" % "0.5")
 ```
-
-## What Bothers Me About This?
-
-1. Does it help or is the original Monad Transformer stack adequate?
-2. The PostRun functions are as nasty as actors, they are just _() => Unit_.
