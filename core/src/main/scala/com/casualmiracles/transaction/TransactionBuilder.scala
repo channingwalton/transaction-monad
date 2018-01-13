@@ -12,7 +12,8 @@ import cats.Monad
   */
 class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
 
-  type Transaction[A] = EitherT[ReaderWriterStateT[F, List[String], List[String], List[PostRun], ?], E, A]
+  type TransState[A] = TransactionStateF[F, A]
+  type Transaction[A] = EitherT[TransState, E, A]
 
   def apply[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]]): Transaction[A] =
     EitherT(s)
