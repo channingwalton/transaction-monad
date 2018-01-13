@@ -53,13 +53,13 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
     }
   }
 
-//    "an option" - {
-//      "some" in {
-//        builder.fromOption(Some(1), "oops").unsafeRun mustBe Success(1)
-//      }
-//      "none" in {
-//        builder..fromOption(None, "oops").unsafeRun mustBe Failure("oops")
-//      }
-//    }
+    "an option" - {
+      "some" in {
+        builder.liftOption(Some(1), "oops").unsafeRun mustBe Success(1)
+      }
+      "none" in {
+        builder.liftOption(None, "oops").unsafeRun mustBe Failure("oops")
+      }
+    }
   }
 }

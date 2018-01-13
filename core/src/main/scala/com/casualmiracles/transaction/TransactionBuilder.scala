@@ -32,6 +32,9 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
     apply(value)
   }
 
+  def liftOption[A](option: Option[A], error: E) =
+    liftEither(option.fold[Either[E, A]](Left(error))(Right(_)))
+
   def liftS[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], A]): Transaction[A] = {
     EitherT.liftF(s)
   }
