@@ -2,6 +2,7 @@ package com.casualmiracles.transaction
 
 import cats.Id
 import cats.instances.list._
+import com.casualmiracles.transaction.Result._
 import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
 
 class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
@@ -32,31 +33,32 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
 
       res.value.run(Nil, Nil)._2.size mustBe 2
   }
-//
-//  "construct from" - {
-//    "a success value" in {
-//      Transaction.success(1).unsafeAttemptRun mustBe Success(1)
-//    }
-//
-//    "a failure value" in {
-//      Transaction.failure("oops").unsafeAttemptRun mustBe Failure("oops")
-//    }
-//
-//    "an either" - {
-//      "right" in {
-//        Transaction.fromEither(Right(1)).unsafeAttemptRun mustBe Success(1)
-//      }
-//      "left" in {
-//        Transaction.fromEither(Left("oops")).unsafeAttemptRun mustBe Failure("oops")
-//      }
-//    }
-//
+
+  "construct from" - {
+    "a success value" in {
+      builder.point(1).unsafeRun mustBe Success(1)
+    }
+
+    "a failure value" in {
+      builder.failure("oops").unsafeRun mustBe Failure("oops")
+    }
+
+    "an either" - {
+      "right" in {
+        builder.liftEither(Right(1)).unsafeRun mustBe Success(1)
+      }
+      "left" in {
+        builder.liftEither(Left("oops")).unsafeRun mustBe Failure("oops")
+      }
+    }
+  }
+
 //    "an option" - {
 //      "some" in {
-//        Transaction.fromOption(Some(1), "oops").unsafeAttemptRun mustBe Success(1)
+//        builder.fromOption(Some(1), "oops").unsafeRun mustBe Success(1)
 //      }
 //      "none" in {
-//        Transaction.fromOption(None, "oops").unsafeAttemptRun mustBe Failure("oops")
+//        builder..fromOption(None, "oops").unsafeRun mustBe Failure("oops")
 //      }
 //    }
   }

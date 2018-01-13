@@ -19,7 +19,13 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
     EitherT(s)
 
   def point[A](a: A): Transaction[A] =
+    success(a)
+
+  def success[A](a: A): Transaction[A] =
     liftEither(Right[E, A](a))
+
+  def failure[A](e: E): Transaction[A] =
+    liftEither(Left[E, A](e))
 
   def liftEither[A](e: Either[E, A]): Transaction[A] = {
     val value: ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]] = ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]]((c, p) ⇒ monadF.point((c, p, e)))
