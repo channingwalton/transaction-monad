@@ -43,6 +43,8 @@ The [TransactionRunner](core/src/main/scala/com/casualmiracles/transaction/Trans
 The core module is supplemented by a second module, _cats-effect_, that provides _TransactionIO_
 to build and run a _Transaction[cats.effect.IO, E, A]_, and a [TransactionRunner[IO]](core/src/main/scala/com/casualmiracles/transaction/TransactionRunner.scala).
 
+See [DoobieExample](examples/src/main/scala/com/casualmiracles/transaction/examples/doobie/DoobieExample.scala)
+
 # Using the Transaction Monad
 
 ```scala
