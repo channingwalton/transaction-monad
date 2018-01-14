@@ -81,6 +81,30 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
     def log(msg: String): Transaction[A] =
       apply(transaction.value.mapWritten(_ :+ msg))
 
+    /**
+      * Apply a monadic function and discard the result while keeping the effect - the so-called Kestrel combinator.
+      */
+    def flatTap[B](f: A => Transaction[B]): Transaction[A] =
+      transaction.flatMap(t => f(t).map(_ => t))
+
+    /**
+      * alias for [[flatTap]]
+      */
+    def <|[B](f: A => Transaction[B]): Transaction[A] =
+      flatTap(f)
+
+    /**
+      * Apply a function to the value returning the original transaction
+      */
+    def tap(f: A => Unit): Transaction[A] =
+      transaction.map(t => { f(t); t })
+
+    /**
+      * Discard the value.
+      */
+    def void: Transaction[Unit] =
+      transaction.map(_ => ())
+
     def unsafeRun(implicit runner: TransactionRunner[F]): Result[E, A] =
       runner.unsafeRun(transaction) match {
         case Left(t) ⇒ Result.Error(t)
