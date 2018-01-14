@@ -30,7 +30,7 @@ object DoobieExample extends App {
   object Store {
 
     // something to convert from a ConnectionIO to an ExampleTransaction
-    implicit class ToExampleTransaction[A](conn: ConnectionIO[A]) {
+    implicit class ToTransaction[A](conn: ConnectionIO[A]) {
       def transaction: Transaction[A] =
         TransactionIO.lift(conn.transact(xa))
     }
@@ -65,5 +65,5 @@ object DoobieExample extends App {
   /*
   I know the meaning of life is 42, I have the brain the size of a planet. And I'm a parking attendant.
   Success(List(),true)
-   */
+ */
 }
