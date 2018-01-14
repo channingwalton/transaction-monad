@@ -1,6 +1,6 @@
 package com.casualmiracles.transaction.examples.doobie
 
-import com.casualmiracles.transaction.{ TransactionBuilder, TransactionF }
+import com.casualmiracles.transaction.TransactionBuilder
 import doobie._
 import doobie.implicits._
 import cats.effect._
@@ -12,9 +12,8 @@ object DoobieExample extends App {
 
   val builder = new TransactionBuilder[IO, String]()
 
-  type Transaction[A] = builder.Transaction[A]
-
-  import builder.TransactionSyntax
+  // This will import the Transaction[_] type, and the list monoid
+  import builder._
 
   // The T R A N S A C T O R !
   val xa: H2Transactor[IO] = H2Transactor.newH2Transactor[IO]("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "").unsafeRunSync()
@@ -28,29 +27,26 @@ object DoobieExample extends App {
   """.update
   create.run.transact(xa).unsafeRunSync
 
-  // Fix the error type to a String and the effect to IO
-  type ExampleTransaction[A] = TransactionF[IO, String, A]
-
   object Store {
 
     // something to convert from a ConnectionIO to an ExampleTransaction
     implicit class ToExampleTransaction[A](conn: ConnectionIO[A]) {
-      def transaction: ExampleTransaction[A] =
+      def transaction: Transaction[A] =
         TransactionIO.lift(conn.transact(xa))
     }
 
-    def meaningOfLife: ExampleTransaction[Int] =
+    def meaningOfLife: Transaction[Int] =
       42.pure[ConnectionIO].transaction
 
-    def parkShip(ship: String, duration: Int): ExampleTransaction[Boolean] = {
+    def parkShip(ship: String, duration: Int): Transaction[Boolean] = {
       val update: ConnectionIO[Boolean] = sql"insert into carpark (ship, duration) values ($ship, $duration)".update.run.map(_ == 1)
       update.transaction
     }
   }
 
   // use the store with a post commit
-  def parkTheShipMarvin(ship: String, duration: Int): ExampleTransaction[Boolean] = {
-    def complainAbout(meaningOfLife: Int): ExampleTransaction[Unit] =
+  def parkTheShipMarvin(ship: String, duration: Int): Transaction[Boolean] = {
+    def complainAbout(meaningOfLife: Int): Transaction[Unit] =
       builder.postRun(
         () ⇒ println(s"I know the meaning of life is $meaningOfLife, I have the brain the size of a planet. And I'm a parking attendant.")
       )
@@ -66,4 +62,8 @@ object DoobieExample extends App {
 
   // the console will show the result after the println above in parkTheShipMarvin
   println(res)
+  /*
+  I know the meaning of life is 42, I have the brain the size of a planet. And I'm a parking attendant.
+  Success(List(),true)
+   */
 }
