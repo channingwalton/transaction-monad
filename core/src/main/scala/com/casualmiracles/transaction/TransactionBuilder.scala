@@ -1,6 +1,6 @@
 package com.casualmiracles.transaction
 
-import cats.data.{EitherT, ReaderWriterStateT}
+import cats.data.{ EitherT, ReaderWriterStateT }
 import cats.syntax.all._
 import cats.Monad
 import cats.kernel.Monoid
@@ -18,13 +18,13 @@ import cats.kernel.Monoid
   */
 class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
 
-  type TransState[A] = TransactionStateF[F, A]
+  type TransState[A]  = TransactionStateF[F, A]
   type Transaction[A] = EitherT[TransState, E, A]
 
   /** This is here so that when the builder is used, you can `import builder._`
-   * and not suffer the pain of misleading compiler errors about missing implicit
-   * instances for Monad[...]
-   */
+    * and not suffer the pain of misleading compiler errors about missing implicit
+    * instances for Monad[...]
+    */
   implicit val listMonoid: Monoid[List[String]] = cats.instances.all.catsKernelStdMonoidForList
 
   def point[A](a: A): Transaction[A] =

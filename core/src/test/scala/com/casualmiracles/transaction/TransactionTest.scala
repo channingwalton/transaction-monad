@@ -2,7 +2,7 @@ package com.casualmiracles.transaction
 
 import cats.Id
 import com.casualmiracles.transaction.Result._
-import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
+import org.scalatest.{ EitherValues, FreeSpec, MustMatchers }
 
 class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
 
@@ -31,26 +31,26 @@ class TransactionTest extends FreeSpec with MustMatchers with EitherValues {
       val res = t1.flatMap(_ ⇒ t2)
 
       res.value.run(Nil, Nil)._2.size mustBe 2
-  }
-
-  "construct from" - {
-    "a success value" in {
-      success(1).unsafeRun mustBe Success(Nil, 1)
     }
 
-    "a failure value" in {
-      failure("oops").unsafeRun mustBe Failure(Nil, "oops")
-    }
-
-    "an either" - {
-      "right" in {
-        liftEither(Right(1)).unsafeRun mustBe Success(Nil, 1)
+    "construct from" - {
+      "a success value" in {
+        success(1).unsafeRun mustBe Success(Nil, 1)
       }
-      "left" in {
-        liftEither(Left("oops")).unsafeRun mustBe Failure(Nil, "oops")
+
+      "a failure value" in {
+        failure("oops").unsafeRun mustBe Failure(Nil, "oops")
+      }
+
+      "an either" - {
+        "right" in {
+          liftEither(Right(1)).unsafeRun mustBe Success(Nil, 1)
+        }
+        "left" in {
+          liftEither(Left("oops")).unsafeRun mustBe Failure(Nil, "oops")
+        }
       }
     }
-  }
 
     "an option" - {
       "some" in {

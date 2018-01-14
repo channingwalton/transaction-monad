@@ -1,8 +1,8 @@
 package com.casualmiracles.transaction.catseffect
 
-import org.scalatest.{EitherValues, FreeSpec, MustMatchers}
+import org.scalatest.{ EitherValues, FreeSpec, MustMatchers }
 import cats.effect.IO
-import com.casualmiracles.transaction.{Result, TransactionBuilder, TransactionF}
+import com.casualmiracles.transaction.{ Result, TransactionBuilder, TransactionF }
 
 class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
 
@@ -10,23 +10,17 @@ class TransactionIOTest extends FreeSpec with MustMatchers with EitherValues {
   import builder._
 
   "Success" in {
-    assertTransaction(
-      TransactionIO.success[String, String]("hi"),
-      Result.Success[String, String](Nil, "hi"), true)
+    assertTransaction(TransactionIO.success[String, String]("hi"), Result.Success[String, String](Nil, "hi"), true)
   }
 
   "Failure" - {
     "when the result is a failure" in {
-      assertTransaction(
-        TransactionIO.failure[String, String]("oops"),
-        Result.Failure[String, String](Nil, "oops"), false)
+      assertTransaction(TransactionIO.failure[String, String]("oops"), Result.Failure[String, String](Nil, "oops"), false)
     }
 
     "when a non-fatal exception is thrown" in {
       val exception = new RuntimeException()
-      assertTransaction(
-        TransactionIO.success[String, String]("ok").map(_ ⇒ throw exception),
-        Result.Error(exception), false)
+      assertTransaction(TransactionIO.success[String, String]("ok").map(_ ⇒ throw exception), Result.Error(exception), false)
     }
   }
 

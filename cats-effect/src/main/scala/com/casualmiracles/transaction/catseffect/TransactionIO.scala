@@ -1,7 +1,7 @@
 package com.casualmiracles.transaction.catseffect
 
 import cats.effect.IO
-import com.casualmiracles.transaction.{TransactionBuilder, TransactionF}
+import com.casualmiracles.transaction.{ TransactionBuilder, TransactionF }
 
 object TransactionIO {
 
