@@ -6,9 +6,7 @@ import cats.Monad
 import cats.kernel.Monoid
 
 /**
-  * This is a stack of EitherT over ReaderWriterStateT that supports
-  * text logging, post commit functions as state and a value of Either[Throwable, A],
-  * with F as the effect.
+  * This is a builder for the monad transformer stack of EitherT over ReaderWriterStateT.
   *
   * Once you've constructed this builder, you can import `builder._` so that
   * you can use its methods, its syntax, and get the list monoid so you don't
