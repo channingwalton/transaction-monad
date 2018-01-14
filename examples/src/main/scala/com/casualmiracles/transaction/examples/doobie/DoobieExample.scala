@@ -1,6 +1,6 @@
 package com.casualmiracles.transaction.examples.doobie
 
-import com.casualmiracles.transaction.{ PostRun, TransactionBuilder, TransactionF }
+import com.casualmiracles.transaction.{ TransactionBuilder, TransactionF }
 import doobie._
 import doobie.implicits._
 import cats.effect._
@@ -52,9 +52,7 @@ object DoobieExample extends App {
   def parkTheShipMarvin(ship: String, duration: Int): ExampleTransaction[Boolean] = {
     def complainAbout(meaningOfLife: Int): ExampleTransaction[Unit] =
       builder.postRun(
-        PostRun(
-          () ⇒ println(s"I know the meaning of life is $meaningOfLife, I have the brain the size of a planet. And I'm a parking attendant.")
-        )
+        () ⇒ println(s"I know the meaning of life is $meaningOfLife, I have the brain the size of a planet. And I'm a parking attendant.")
       )
 
     // using syntax >>= (flatMap) and >> which is flatMap discarding its argument
