@@ -55,12 +55,12 @@ See [DoobieExample](examples/src/main/scala/com/casualmiracles/transaction/examp
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.casualmiracles" %% "transaction-core" % "0.0.14",
+  "com.casualmiracles" %% "transaction-core" % "0.0.15",
   "org.typelevel" %% "cats-core" % "1.0.0")
 ```
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.casualmiracles" %% "transaction-cats-effect" % "0.0.14",
+  "com.casualmiracles" %% "transaction-cats-effect" % "0.0.15",
   "org.typelevel" %% "cats-effect" % "0.5")
 ```
