@@ -26,7 +26,7 @@ However, this effect stack is a little cumbersome so this project wraps that up 
 
     import com.casualmiracles.transaction._
 
-for all the functions you need to build a _Transaction[F[_], E, A]_ with a success value, a failure, a log, or postrun functions.
+for all the [functions](core/src/main/scala/com/casualmiracles/transaction/package.scala) you need to build a _Transaction[F[_], E, A]_ with a success value, a failure, a log, or postrun functions.
 
 ## Transaction Builder
 
