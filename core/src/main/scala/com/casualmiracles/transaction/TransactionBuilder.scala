@@ -1,12 +1,12 @@
 package com.casualmiracles.transaction
 
-import cats.data.{ EitherT, ReaderWriterStateT }
-import cats.syntax.all._
+import cats.data.EitherT
 import cats.Monad
-import cats.kernel.Monoid
 
 /**
-  * This is a builder for the monad transformer stack of EitherT over ReaderWriterStateT.
+  * This is a builder for the monad transformer stack of EitherT over ReaderWriterStateT
+  * that helps you construct TransactionF without having to specify all the types
+  * all the time which is noisy and tedious.
   *
   * Once you've constructed this builder, you can import `builder._` so that
   * you can use its methods, its syntax, and get the list monoid so you don't
@@ -21,54 +21,33 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
   type TransState[A]  = TransactionStateF[F, A]
   type Transaction[A] = EitherT[TransState, E, A]
 
-  /** This is here so that when the builder is used, you can `import builder._`
-    * and not suffer the pain of misleading compiler errors about missing implicit
-    * instances for Monad[...]
-    */
-  implicit val listMonoid: Monoid[List[String]] = cats.instances.all.catsKernelStdMonoidForList
 
   def point[A](a: A): Transaction[A] =
-    success(a)
+    pointF(a)
 
   def success[A](a: A): Transaction[A] =
-    liftEither(Right[E, A](a))
+    successF(a)
 
   def failure[A](e: E): Transaction[A] =
-    liftEither(Left[E, A](e))
+    failureF(e)
 
   def liftEither[A](e: Either[E, A]): Transaction[A] =
-    apply(ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]]((c, p) ⇒ monadF.point((c, p, e))))
+    liftEitherF(e)
 
   def liftOption[A](option: Option[A], error: E): Transaction[A] =
-    liftEither(option.fold[Either[E, A]](Left(error))(Right(_)))
+    liftOptionF(option, error)
 
-  def liftF[A](s: F[A]): Transaction[A] = apply {
-    ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]] {
-      case (_, st) => monadF.map(s)(v ⇒ (List.empty[String], st, Right[E, A](v)))
-    }
-  }
+  def lift[A](s: F[A]): Transaction[A] =
+    liftF(s)
 
-  def log(msg: String): Transaction[Unit] = liftS {
-    ReaderWriterStateT[F, List[String], List[String], List[PostRun], Unit] {
-      case (_, s) => (List(msg), s, ()).pure[F]
-    }
-  }
+  def log(msg: String): Transaction[Unit] =
+    logF(msg)
 
   def postRun(f: () ⇒ Unit): Transaction[Unit] =
-    postRun(PostRun(f))
+    postRunF(f)
 
   def postRun(pc: PostRun): Transaction[Unit] =
-    liftS {
-      ReaderWriterStateT[F, List[String], List[String], List[PostRun], Unit] {
-        case (_, s) => (List.empty[String], s :+ pc, ()).pure[F]
-      }
-    }
-
-  private def liftS[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], A]): Transaction[A] =
-    EitherT.liftF(s)
-
-  private def apply[A](s: ReaderWriterStateT[F, List[String], List[String], List[PostRun], Either[E, A]]): Transaction[A] =
-    EitherT(s)
+    postRunF(pc)
 
   implicit class TransactionSyntax[A](transaction: Transaction[A]) {
 
@@ -76,10 +55,10 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
       postRun(PostRun(f))
 
     def postRun(pc: PostRun): Transaction[A] =
-      apply(transaction.value.modify(pcs ⇒ pc :: pcs))
+      applyF(transaction.value.modify(pcs ⇒ pc :: pcs))
 
     def log(msg: String): Transaction[A] =
-      apply(transaction.value.mapWritten(_ :+ msg))
+      applyF(transaction.value.mapWritten(_ :+ msg))
 
     /**
       * Apply a monadic function and discard the result while keeping the effect - the so-called Kestrel combinator.

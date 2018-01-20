@@ -17,7 +17,7 @@ object TransactionIO {
     fromEither(Left[E, A](err))
 
   def lift[E, A](value: IO[A]): TransactionF[IO, E, A] =
-    builder[E].liftF(value)
+    builder[E].lift(value)
 
   def onSuccess[E](f: () ⇒ Unit): TransactionF[IO, E, Unit] =
     builder.postRun(f)
