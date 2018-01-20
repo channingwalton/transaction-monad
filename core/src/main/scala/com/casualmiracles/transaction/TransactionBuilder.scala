@@ -21,7 +21,6 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
   type TransState[A]  = TransactionStateF[F, A]
   type Transaction[A] = EitherT[TransState, E, A]
 
-
   def point[A](a: A): Transaction[A] =
     pointF(a)
 
@@ -48,52 +47,4 @@ class TransactionBuilder[F[_], E](implicit val monadF: Monad[F]) {
 
   def postRun(pc: PostRun): Transaction[Unit] =
     postRunF(pc)
-
-  implicit class TransactionSyntax[A](transaction: Transaction[A]) {
-
-    def postRun(f: () ⇒ Unit): Transaction[A] =
-      postRun(PostRun(f))
-
-    def postRun(pc: PostRun): Transaction[A] =
-      applyF(transaction.value.modify(pcs ⇒ pc :: pcs))
-
-    def log(msg: String): Transaction[A] =
-      applyF(transaction.value.mapWritten(_ :+ msg))
-
-    /**
-      * Apply a monadic function and discard the result while keeping the effect - the so-called Kestrel combinator.
-      */
-    def flatTap[B](f: A => Transaction[B]): Transaction[A] =
-      transaction.flatMap(t => f(t).map(_ => t))
-
-    /**
-      * alias for [[flatTap]]
-      */
-    def <|[B](f: A => Transaction[B]): Transaction[A] =
-      flatTap(f)
-
-    /**
-      * Apply a function to the value returning the original transaction
-      */
-    def tap(f: A => Unit): Transaction[A] =
-      transaction.map(t => { f(t); t })
-
-    /**
-      * Discard the value.
-      */
-    def void: Transaction[Unit] =
-      transaction.map(_ => ())
-
-    def unsafeRun(implicit runner: TransactionRunner[F]): Result[E, A] =
-      runner.unsafeRun(transaction) match {
-        case Left(t) ⇒ Result.Error(t)
-
-        case Right((logs, _, Left(e))) ⇒
-          Result.Failure(logs, e)
-
-        case Right((logs, f, Right(a))) ⇒
-          f.foreach(_.f())
-          Result.Success(logs, a)
-      }
-  }
 }

@@ -22,6 +22,12 @@ email sent if the workflow transition failed to be successfully committed. (e.g.
 
 However, this effect stack is a little cumbersome so this project wraps that up for you.
 
+## TransactionF
+
+    import com.casualmiracles.transaction._
+
+for all the functions you need to build a _Transaction[F[_], E, A]_ with a success value, a failure, a log, or postrun functions.
+
 ## Transaction Builder
 
 The [TransactionBuilder](core/src/main/scala/com/casualmiracles/transaction/TransactionBuilder.scala) helps you build Transaction instances for
