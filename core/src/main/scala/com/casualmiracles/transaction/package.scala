@@ -100,6 +100,21 @@ package object transaction {
     EitherT.liftF(s)
 
   /**
+    * Run the transaction with the provided runner.
+    */
+  def unsafeRunF[F[_], E, A](transaction: TransactionF[F, E, A])(implicit runner: TransactionRunner[F]): Result[E, A] =
+    runner.unsafeRun(transaction) match {
+      case Left(t) ⇒ Result.Error(t)
+
+      case Right((logs, _, Left(e))) ⇒
+        Result.Failure(logs, e)
+
+      case Right((logs, f, Right(a))) ⇒
+        f.foreach(_.f())
+        Result.Success(logs, a)
+    }
+
+  /**
     * Syntax for working with TransactionF instances.
     */
   implicit class TransactionSyntax[F[_]: Monad, E, A](transaction: TransactionF[F, E, A]) {
@@ -138,15 +153,6 @@ package object transaction {
       transaction.map(_ => ())
 
     def unsafeRun(implicit runner: TransactionRunner[F]): Result[E, A] =
-      runner.unsafeRun(transaction) match {
-        case Left(t) ⇒ Result.Error(t)
-
-        case Right((logs, _, Left(e))) ⇒
-          Result.Failure(logs, e)
-
-        case Right((logs, f, Right(a))) ⇒
-          f.foreach(_.f())
-          Result.Success(logs, a)
-      }
+      unsafeRunF(transaction)
   }
 }
